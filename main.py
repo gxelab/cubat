@@ -99,21 +99,18 @@ class Cubat:
 sars_cov_2 = Cubat('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta')
 print(sars_cov_2.generate_dataframes())
 
-sars_cov_2_seq1 = sars_cov_2.generate_dataframe(sars_cov_2.sequences[1])
-plt.rcParams['figure.figsize'] = (12, 14)
-codons = sars_cov_2_seq1['codon'].values.tolist()
-quantity = sars_cov_2_seq1['quantity'].values.tolist()
-sars_cov_2_seq1_pivot_table = pd.DataFrame([])
-for codon in codons:
-    sars_cov_2_seq1_pivot_table = pd.concat([sars_cov_2_seq1_pivot_table,
-                                             sars_cov_2_seq1.loc[sars_cov_2_seq1['codon'] == codon]])
-sars_cov_2_seq1_pivot_table = sars_cov_2_seq1_pivot_table.pivot_table(index='codon', values='quantity',
-                                                                      columns='amino_acid').fillna(0)
+# sars_cov_2_seq1 = sars_cov_2.generate_dataframe(sars_cov_2.sequences[1])
+# plt.rcParams['figure.figsize'] = (12, 14)
+# codons = sars_cov_2_seq1['codon'].values.tolist()
+# quantity = sars_cov_2_seq1['quantity'].values.tolist()
+# sars_cov_2_seq1_pivot_table = pd.DataFrame([])
+# for codon in codons:
+#     sars_cov_2_seq1_pivot_table = pd.concat([sars_cov_2_seq1_pivot_table,
+#                                              sars_cov_2_seq1.loc[sars_cov_2_seq1['codon'] == codon]])
+# sars_cov_2_seq1_pivot_table = sars_cov_2_seq1_pivot_table.pivot_table(index='codon', values='quantity',
+#                                                                       columns='amino_acid').fillna(0)
 # sns.heatmap(sars_cov_2_seq1_pivot_table, cmap=plt.cm.Reds, linewidths=0.01)
-# print(sars_cov_2_seq1[0])
-# plt.hist(x=sars_cov_2_seq1['codon', 'quantity'])
-# print(quantity)
-
+# 
 # plt.bar(codons, quantity, color='pink')
 # plt.xticks(fontsize=7)
 # plt.show()
