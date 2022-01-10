@@ -24,11 +24,11 @@ class Cubat:
 
         for dna_seq in sequence:
             Cubat.i += 1
-            locals()['info' + str(Cubat.i)] = names[Cubat.i]
+            # locals()['info' + str(Cubat.i)] = names[Cubat.i]
             locals()['seq' + str(Cubat.i)] = dna_seq
             locals()['seq' + str(Cubat.i)] = [seq.strip() for seq in locals()['seq' + str(Cubat.i)]]  # Remove '\n'
             locals()['seq' + str(Cubat.i)] = ''.join(locals()['seq' + str(Cubat.i)])  # Merge into one line string
-            Cubat.correspondence.update({locals()['info' + str(Cubat.i)]: locals()['seq' + str(Cubat.i)]})
+            # Cubat.correspondence.update({locals()['info' + str(Cubat.i)]: locals()['seq' + str(Cubat.i)]})
             Cubat.sequences.update({Cubat.i: locals()['seq' + str(Cubat.i)]})
         return Cubat.sequences
 
@@ -46,12 +46,12 @@ class Cubat:
 
     @staticmethod
     def locate_stop_codon(seq):
-        if seq.count('UGA'):
-            return seq.index('UGA')
-        elif seq.count('UAA'):
-            return seq.index('UAA')
-        elif seq.count('UAG'):
-            return seq.index('UAG')
+        if seq.count('UGA1'):
+            return seq.index('UGA1')
+        elif seq.count('UAA1'):
+            return seq.index('UAA1')
+        elif seq.count('UAG1'):
+            return seq.index('UAG1')
 
     @staticmethod
     def process_mrna_seq(cut_seq, stop_codon_location):
@@ -96,24 +96,23 @@ class Cubat:
         return 'Complete, ' + str(key) + ' sequences in total.'
 
 
-sars_cov_2 = Cubat('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta')
-print(sars_cov_2.generate_dataframes())
-
+sars_cov_2 = Cubat("Test_Data/Sars_cov_2.ASM985889v3.cds.fasta")
 sars_cov_2_seq1 = sars_cov_2.generate_dataframe(sars_cov_2.sequences[1])
-plt.rcParams['figure.figsize'] = (12, 14)
-codons = sars_cov_2_seq1['codon'].values.tolist()
-quantity = sars_cov_2_seq1['quantity'].values.tolist()
-sars_cov_2_seq1_pivot_table = pd.DataFrame([])
-for codon in codons:
-    sars_cov_2_seq1_pivot_table = pd.concat([sars_cov_2_seq1_pivot_table,
-                                             sars_cov_2_seq1.loc[sars_cov_2_seq1['codon'] == codon]])
-sars_cov_2_seq1_pivot_table = sars_cov_2_seq1_pivot_table.pivot_table(index='codon', values='quantity',
-                                                                      columns='amino_acid').fillna(0)
+print(sars_cov_2_seq1)
+
+
+# plt.rcParams['figure.figsize'] = (12, 14)
+# codons = sars_cov_2_seq1['codon'].values.tolist()
+# quantity = sars_cov_2_seq1['quantity'].values.tolist()
+# sars_cov_2_seq1_pivot_table = pd.DataFrame([])
+# for codon in codons:
+#     sars_cov_2_seq1_pivot_table = pd.concat([sars_cov_2_seq1_pivot_table,
+#                                              sars_cov_2_seq1.loc[sars_cov_2_seq1['codon'] == codon]])
+# sars_cov_2_seq1_pivot_table = sars_cov_2_seq1_pivot_table.pivot_table(index='codon', values='quantity',
+#                                                                       columns='amino_acid').fillna(0)
 # sns.heatmap(sars_cov_2_seq1_pivot_table, cmap=plt.cm.Reds, linewidths=0.01)
-# print(sars_cov_2_seq1[0])
-# plt.hist(x=sars_cov_2_seq1['codon', 'quantity'])
-# print(quantity)
 
 # plt.bar(codons, quantity, color='pink')
 # plt.xticks(fontsize=7)
 # plt.show()
+
