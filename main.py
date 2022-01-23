@@ -113,3 +113,5 @@ print(sars_cov_2_seq1)
 # plt.bar(codons, quantity, color='pink')
 # plt.xticks(fontsize=7)
 # plt.show()
+
+# test
