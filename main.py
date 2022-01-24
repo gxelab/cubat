@@ -61,7 +61,8 @@ class Cubat:
     def count_codon(processed_mrna_seq):
         # Convert mRNA_seq into dataframe of pandas
         codon_series = pd.value_counts(processed_mrna_seq)
-        codon_dic = {'codon': codon_series.index, 'quantity': codon_series.values}
+        codon_dic = {'codon': codon_series.index, 'Obsi': codon_series.values}
+        # Obsi = Observed number of occurrences of codon "i"
         codon_dataframe = pd.DataFrame(codon_dic)
         return codon_dataframe
 
@@ -95,10 +96,17 @@ class Cubat:
             print(Cubat.generate_dataframe(Cubat.sequences[key]))
         return 'Complete, ' + str(key) + ' sequences in total.'
 
+    @staticmethod
+    def RSCU(RSCU_amino_acid, RSCU_codon):
+        amino_sum_dataframe = sars_cov_2_seq1.groupby(by=["amino_acid"])["Obsi"].sum()
+        amino_acid_value = sars_cov_2_seq1["amino_acid"].value_counts()
+        average_amino_acid_encoding = amino_sum_dataframe[RSCU_amino_acid] / amino_acid_value[RSCU_amino_acid]
+        # The average number of uses of all codons encoding the amino acid
+        the_codon_usage = sars_cov_2_seq1.loc[sars_cov_2_seq1["codon"] == RSCU_codon, "Obsi"].iloc[0]
+        # Query the codon usage
+        rscu_value = average_amino_acid_encoding / the_codon_usage
+        return rscu_value
 
-sars_cov_2 = Cubat("Test_Data/Sars_cov_2.ASM985889v3.cds.fasta")
-sars_cov_2_seq1 = sars_cov_2.generate_dataframe(sars_cov_2.sequences[1])
-print(sars_cov_2_seq1)
 
 # plt.rcParams['figure.figsize'] = (12, 14)
 # codons = sars_cov_2_seq1['codon'].values.tolist()
@@ -115,3 +123,17 @@ print(sars_cov_2_seq1)
 # plt.show()
 
 # test
+
+
+sars_cov_2 = Cubat("Test_Data/Sars_cov_2.ASM985889v3.cds.fasta")
+sars_cov_2_seq1 = sars_cov_2.generate_dataframe(sars_cov_2.sequences[1])
+print(sars_cov_2_seq1)
+
+# amino_sum_dataframe = sars_cov_2_seq1.groupby(by=["amino_acid"])["Obsi"].sum()
+# amino_acid_value = sars_cov_2_seq1["amino_acid"].value_counts()
+# average_amino_acid_encoding = amino_sum_dataframe["A"] / amino_acid_value["A"]
+# The average number of uses of all codons encoding the amino acid
+# print(average_amino_acid_encoding)
+# the_codon_usage = sars_cov_2_seq1.loc[sars_cov_2_seq1["codon"] == "GCU", "Obsi"].iloc[0]  # Query the codon usage
+# RSCU = average_amino_acid_encoding / the_codon_usage
+# print(RSCU)
