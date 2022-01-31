@@ -1,4 +1,5 @@
 import re
+import os
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -10,11 +11,13 @@ class Cubat:
     i = 0
     correspondence = {}
     sequences = {}
+    sequence_number = {}
     total_sequences = ''
 
     def __init__(self, data_path, codon_table=CodonTable.unambiguous_rna_by_id[1]):
         self.data_path = data_path
         self.filename = re.search(r'/.*', data_path).group()[1:]
+        print(self.filename)
         self.codon_table_forward_table = codon_table.forward_table
         self.codon_table = codon_table
         Cubat.get_data(self, self.data_path)
@@ -31,10 +34,12 @@ class Cubat:
             locals()['seq' + str(Cubat.i)] = ''.join(locals()['seq' + str(Cubat.i)])  # Merge into one line string
             # Cubat.total_sequences.update = ''
             Cubat.correspondence.update({locals()['info' + str(Cubat.i)]: locals()['seq' + str(Cubat.i)]})
+            Cubat.sequence_number.update({locals()['info' + str(Cubat.i)]: str(Cubat.i)})
             Cubat.sequences.update({Cubat.i: locals()['seq' + str(Cubat.i)]})
             Cubat.total_sequences = Cubat.total_sequences + ''.join(locals()['seq' + str(Cubat.i)])
             Cubat.i += 1
         Cubat.correspondence.update({(self.filename + '(total sequences)'): Cubat.total_sequences})
+        Cubat.sequence_number.update({(self.filename + '(total sequences)'): 'total'})
         return Cubat.sequences
 
     @staticmethod
@@ -129,9 +134,14 @@ class Cubat:
     def generate_dataframe_total(self):
         return Cubat.generate_dataframe(self, (self.filename + '(total sequences)'))
 
-    def generate_dataframes(self):
+    def generate_dataframes(self, output_path):
         for key in Cubat.correspondence:
-            print(key, '\n', Cubat.generate_dataframe(self, key))  # Cubat.sequences[key]))
+            file_path = output_path + Cubat.sequence_number[key] + '.csv'
+            open(file_path, 'w')
+            Cubat.generate_rscu_dataframe(self, Cubat.generate_dataframe(self, key), key) \
+                .to_csv(file_path, sep=',', index=False, header=True)
+            # Cubat.generate_dataframe(self, key).to_csv(file_path, sep=',', index=False, header=False)
+            # print(key, '\n', Cubat.generate_dataframe(self, key))  # Cubat.sequences[key]))
         return 'Completed'  # 'Completed, ' + str(key) + ' sequences in total.'
 
     def rscu(self, rscu_codon, sequence_info):
@@ -173,6 +183,7 @@ class Cubat:
         for codon in codons:
             pivot_table = pd.concat([pivot_table, dataframe.loc[dataframe['codon'] == codon]])
         pivot_table = pivot_table.pivot_table(index='codon', values=values, columns='amino_acid').fillna(0)
+        print(type(pivot_table))
         return pivot_table
 
 
@@ -181,12 +192,14 @@ class Cubat:
 
 sars_cov_2 = Cubat('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta')
 sars_cov_2_total = sars_cov_2.generate_dataframe_total()
+# print(sars_cov_2_total)
 sars_cov_2_total_RSCU_dataframe = sars_cov_2.generate_rscu_dataframe(sars_cov_2_total, 'Sars_cov_2.ASM985889v3.cds.fasta(total sequences)')
+# print(Cubat.correspondence['Sars_cov_2.ASM985889v3.cds.fasta(total sequences)'])
 # print(sars_cov_2_total)
 # print(sars_cov_2.correspondence)
 # print(sars_cov_2.rscu('AAA', 'Sars_cov_2.ASM985889v3.cds.fasta(total sequences)'))
 # print(sars_cov_2.generate_rscu_dataframe(sars_cov_2_total, 'Sars_cov_2.ASM985889v3.cds.fasta(total sequences)'))
-# print(sars_cov_2.generate_dataframes())
+# sars_cov_2.generate_dataframes('Test_Data/Sars_cov_2.ASM985889v3/')
 # sars_cov_2_total = sars_cov_2.generate_dataframe(sars_cov_2.total_sequences)
 # print(sars_cov_2_total)
 # print(sars_cov_2_total[(sars_cov_2_total['codon"] == "GUU")].at[0, "amino_acid"])
@@ -196,8 +209,10 @@ sars_cov_2_total_RSCU_dataframe = sars_cov_2.generate_rscu_dataframe(sars_cov_2_
 # fw.write(str(sars_cov_2.correspondence))
 # print(sars_cov_2_total_RSCU)
 # plt.rcParams['figure.figsize'] = (12, 14)
-print(sars_cov_2.generate_pivot_table(sars_cov_2_total_RSCU_dataframe, 'RSCU'))
-# sns.heatmap(sars_cov_2_seq1_pivot_table, cmap=plt.cm.Reds, linewidths=0.01)
+sars_cov_2_seq1_pivot_table = sars_cov_2.generate_pivot_table(sars_cov_2_total_RSCU_dataframe, 'RSCU')
+print(sars_cov_2_seq1_pivot_table)
+sns.heatmap(sars_cov_2_seq1_pivot_table, cmap=plt.cm.Reds, linewidths=0.01)
 # plt.bar(codons, Obsi, color='pink')
 # plt.xticks(fontsize=7)
-# plt.show()
+plt.show()
+# Todo 正则表达式
