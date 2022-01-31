@@ -25,7 +25,6 @@ class Cubat:
         sequence = re.findall(r']((?:.|\n)*?)>', data)
         names = re.findall(r'>((?:.|\n)*?)]', data)
         for dna_seq in sequence:
-
             locals()['info' + str(Cubat.i)] = names[Cubat.i] + ']'
             locals()['seq' + str(Cubat.i)] = dna_seq
             locals()['seq' + str(Cubat.i)] = [seq.strip() for seq in locals()['seq' + str(Cubat.i)]]  # Remove '\n'
@@ -166,13 +165,23 @@ class Cubat:
         rscu_dataframe = codon_dataframe.merge(pd.DataFrame({'RSCU': rscu_list}), left_index=True, right_index=True)
         return rscu_dataframe
 
+    @staticmethod
+    def generate_pivot_table(dataframe, values):
+        codons = dataframe['codon'].values.tolist()
+        # values_list = dataframe[values].values.tolist()
+        pivot_table = pd.DataFrame([])
+        for codon in codons:
+            pivot_table = pd.concat([pivot_table, dataframe.loc[dataframe['codon'] == codon]])
+        pivot_table = pivot_table.pivot_table(index='codon', values=values, columns='amino_acid').fillna(0)
+        return pivot_table
+
 
 # test
 
 
 sars_cov_2 = Cubat('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta')
 sars_cov_2_total = sars_cov_2.generate_dataframe_total()
-sars_cov_2_total_RSCU = sars_cov_2.generate_rscu_dataframe(sars_cov_2_total, 'Sars_cov_2.ASM985889v3.cds.fasta(total sequences)')
+sars_cov_2_total_RSCU_dataframe = sars_cov_2.generate_rscu_dataframe(sars_cov_2_total, 'Sars_cov_2.ASM985889v3.cds.fasta(total sequences)')
 # print(sars_cov_2_total)
 # print(sars_cov_2.correspondence)
 # print(sars_cov_2.rscu('AAA', 'Sars_cov_2.ASM985889v3.cds.fasta(total sequences)'))
@@ -186,16 +195,9 @@ sars_cov_2_total_RSCU = sars_cov_2.generate_rscu_dataframe(sars_cov_2_total, 'Sa
 # fw = open("Test_Data/test.txt", 'w')
 # fw.write(str(sars_cov_2.correspondence))
 # print(sars_cov_2_total_RSCU)
-plt.rcParams['figure.figsize'] = (12, 14)
-codons = sars_cov_2_total_RSCU['codon'].values.tolist()
-RSCU = sars_cov_2_total_RSCU['RSCU'].values.tolist()
-sars_cov_2_seq1_pivot_table = pd.DataFrame([])
-for codon in codons:
-    sars_cov_2_seq1_pivot_table = pd.concat([sars_cov_2_seq1_pivot_table,
-                                             sars_cov_2_total_RSCU.loc[sars_cov_2_total_RSCU['codon'] == codon]])
-sars_cov_2_seq1_pivot_table = sars_cov_2_seq1_pivot_table.pivot_table(index='codon', values='RSCU',
-                                                                      columns='amino_acid').fillna(0)
-sns.heatmap(sars_cov_2_seq1_pivot_table, cmap=plt.cm.Reds, linewidths=0.01)
+# plt.rcParams['figure.figsize'] = (12, 14)
+print(sars_cov_2.generate_pivot_table(sars_cov_2_total_RSCU_dataframe, 'RSCU'))
+# sns.heatmap(sars_cov_2_seq1_pivot_table, cmap=plt.cm.Reds, linewidths=0.01)
 # plt.bar(codons, Obsi, color='pink')
 # plt.xticks(fontsize=7)
-plt.show()
+# plt.show()
