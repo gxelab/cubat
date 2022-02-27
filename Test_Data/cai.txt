@@ -1,0 +1,24 @@
+Output of codon adaptation index (CAI) from DAMBE
+(Xia, X. 2007. An Improved Implementation of Codon Adaptation Index. Evolutionary Bioinformatics 3:53¨C58.)
+
+Reference species: Homo sapiens                                                                    
+Note: CAI is the conventional codon adaptation index, CAI2 is simply Sum[CodonFreq(J)*w(J)]/Sum[CodonFreq(J)], which does not have the problem involving w(J) = 0.
+
+SeqName                 SeqLen       CAI      CAI2
+--------------------------------------------------
+ENSSAST00005000002.1     21291   0.67716   0.72274
+ENSSAST00005000003.1     13218   0.67677   0.72227
+ENSSAST00005000004.1      3822   0.68767   0.73029
+ENSSAST00005000005.1      1260   0.71357   0.75679
+ENSSAST00005000006.1       828   0.67471   0.72219
+ENSSAST00005000007.1       669   0.65684   0.71274
+ENSSAST00005000008.1       366   0.69114   0.72892
+ENSSAST00005000009.1       366   0.68235   0.72608
+ENSSAST00005000010.1       228   0.59799   0.66498
+ENSSAST00005000011.1       186   0.64970   0.69143
+ENSSAST00005000012.1       132   0.68628   0.72060
+ENSSAST00005000013.1       117   0.59307   0.64576
+--------------------------------------------------
+Mean                             0.66560   0.71207
+STD                              0.03650   0.03052
+

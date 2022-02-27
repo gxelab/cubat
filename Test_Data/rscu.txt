@@ -1,0 +1,72 @@
+The following table was first sorted by AA and then by codon:
+
+Codon  AA   ObsFreq      RSCU
+=================================
+  UAA   *        10     2.500
+  UAG   *         1     0.250
+  UGA   *         1     0.250
+  GCA   A       263     1.088
+  GCC   A       142     0.587
+  GCG   A        38     0.157
+  GCU   A       524     2.168
+  UGC   C        92     0.424
+  UGU   C       342     1.576
+  GAC   D       262     0.726
+  GAU   D       460     1.274
+  GAA   E       495     1.454
+  GAG   E       186     0.546
+  UUC   F       201     0.568
+  UUU   F       507     1.432
+  GGA   G       163     0.776
+  GGC   G       145     0.690
+  GGG   G        23     0.110
+  GGU   G       509     2.424
+  CAC   H        80     0.606
+  CAU   H       184     1.394
+  AUA   I       225     0.927
+  AUC   I       133     0.548
+  AUU   I       370     1.525
+  AAA   K       541     1.291
+  AAG   K       297     0.709
+  CUA   L       147     0.791
+  CUC   L       131     0.705
+  CUG   L        65     0.350
+  CUU   L       400     2.153
+  UUA   L       370     1.190
+  UUG   L       252     0.810
+  AUG   M       312     1.000
+  AAC   N       245     0.641
+  AAU   N       520     1.359
+  CCA   P       220     1.577
+  CCC   P        40     0.287
+  CCG   P        21     0.151
+  CCU   P       277     1.986
+  CAA   Q       351     1.360
+  CAG   Q       165     0.640
+  AGA   R       211     1.518
+  AGG   R        67     0.482
+  CGA   R        24     0.473
+  CGC   R        46     0.906
+  CGG   R        14     0.276
+  CGU   R       119     2.345
+  AGC   S        52     0.364
+  AGU   S       234     1.636
+  UCA   S       266     1.590
+  UCC   S        72     0.430
+  UCG   S        17     0.102
+  UCU   S       314     1.877
+  ACA   T       436     1.641
+  ACC   T       101     0.380
+  ACG   T        48     0.181
+  ACU   T       478     1.799
+  GUA   V       255     0.885
+  GUC   V       153     0.531
+  GUG   V       169     0.587
+  GUU   V       575     1.997
+  UGG   W       157     1.000
+  UAC   Y       257     0.799
+  UAU   Y       386     1.201
+=================================
+If the first codon in every sequence happens to be the start codon, then here is the start codon frequencies:
+AUG	12
+

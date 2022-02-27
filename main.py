@@ -1,8 +1,10 @@
 import re
-import os
+# import os
+import math
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
+import numpy as np
+# import seaborn as sns
+# import matplotlib.pyplot as plt
 from Bio.Seq import Seq
 from Bio.Data import CodonTable
 
@@ -17,7 +19,7 @@ class Cubat:
     def __init__(self, data_path, codon_table=CodonTable.unambiguous_rna_by_id[1]):
         self.data_path = data_path
         self.filename = re.search(r'/.*', data_path).group()[1:]
-        print(self.filename)
+        # print(self.filename)
         self.codon_table_forward_table = codon_table.forward_table
         self.codon_table = codon_table
         Cubat.get_data(self, self.data_path)
@@ -144,17 +146,26 @@ class Cubat:
             # print(key, '\n', Cubat.generate_dataframe(self, key))  # Cubat.sequences[key]))
         return 'Completed'  # 'Completed, ' + str(key) + ' sequences in total.'
 
-    def rscu(self, rscu_codon, sequence_info):
+    def info_rscu(self, rscu_codon, sequence_info):
         rscu_dataframe = Cubat.generate_dataframe(self, sequence_info)
+        return Cubat.rscu(self, rscu_codon, rscu_dataframe)
+
+    def rscu(self, rscu_codon, rscu_dataframe):
         try:
-            rscu_amino_acid = list(rscu_dataframe[(rscu_dataframe['codon'] == rscu_codon)]['amino_acid'])[0]
+            rscu_amino_acid = list(rscu_dataframe.loc[rscu_dataframe['codon'] == rscu_codon, 'amino_acid'])[0]
             the_amino_dataframe = rscu_dataframe[(rscu_dataframe['amino_acid'] == rscu_amino_acid)]
             amino_sum = the_amino_dataframe['Obsi'].sum()
             # amino_sum_dataframe = the_amino_dataframe.groupby(by=['amino_acid"])["Obsi"].sum()
             if isinstance(rscu_amino_acid, str):
-                average_amino_acid_encoding = amino_sum / len([k for k, v in self.codon_table_forward_table.items() if
-                                                               v == rscu_amino_acid])
-                # The average number of uses of all codons encoding the amino acid
+                if rscu_amino_acid == '*':
+                    num_encoding_the_codons = len(self.codon_table.stop_codons)
+
+                else:
+                    num_encoding_the_codons = \
+                        len([k for k, v in self.codon_table_forward_table.items() if v == rscu_amino_acid])
+                # The number of all codons encoding this amino acid
+                average_amino_acid_encoding = amino_sum / num_encoding_the_codons
+                # The average number of uses of all codons encoding the amino ac
                 the_codon_usage = the_amino_dataframe.loc[rscu_dataframe["codon"] == rscu_codon, "Obsi"].iloc[0]
                 # Query the codon usage
                 rscu_value = the_codon_usage / average_amino_acid_encoding
@@ -170,8 +181,8 @@ class Cubat:
     def generate_rscu_dataframe(self, codon_dataframe, sequence_info):
         rscu_list = []
         codon_list = codon_dataframe['codon'].tolist()
-        for i in codon_list:
-            rscu_list.append(Cubat.rscu(self, i, sequence_info))
+        for rscu_codon in codon_list:
+            rscu_list.append(Cubat.info_rscu(self, rscu_codon, sequence_info))
         rscu_dataframe = codon_dataframe.merge(pd.DataFrame({'RSCU': rscu_list}), left_index=True, right_index=True)
         return rscu_dataframe
 
@@ -186,33 +197,38 @@ class Cubat:
         print(type(pivot_table))
         return pivot_table
 
-
-# test
+    # @staticmethod
+    # def cai(seq_dataframe, high_expression_gene_table):
+    #     return '---'
 
 
 sars_cov_2 = Cubat('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta')
-sars_cov_2_total = sars_cov_2.generate_dataframe_total()
-# print(sars_cov_2_total)
-sars_cov_2_total_RSCU_dataframe = sars_cov_2.generate_rscu_dataframe(sars_cov_2_total, 'Sars_cov_2.ASM985889v3.cds.fasta(total sequences)')
-# print(Cubat.correspondence['Sars_cov_2.ASM985889v3.cds.fasta(total sequences)'])
-# print(sars_cov_2_total)
-# print(sars_cov_2.correspondence)
-# print(sars_cov_2.rscu('AAA', 'Sars_cov_2.ASM985889v3.cds.fasta(total sequences)'))
-# print(sars_cov_2.generate_rscu_dataframe(sars_cov_2_total, 'Sars_cov_2.ASM985889v3.cds.fasta(total sequences)'))
-# sars_cov_2.generate_dataframes('Test_Data/Sars_cov_2.ASM985889v3/')
-# sars_cov_2_total = sars_cov_2.generate_dataframe(sars_cov_2.total_sequences)
-# print(sars_cov_2_total)
-# print(sars_cov_2_total[(sars_cov_2_total['codon"] == "GUU")].at[0, "amino_acid"])
-# print(sars_cov_2.rscu("GUU")).start_codons
-# print(CodonTable.unambiguous_rna_by_id[1].stop_codons)
-# fw = open("Test_Data/test.txt", 'w')
-# fw.write(str(sars_cov_2.correspondence))
-# print(sars_cov_2_total_RSCU)
-# plt.rcParams['figure.figsize'] = (12, 14)
-sars_cov_2_seq1_pivot_table = sars_cov_2.generate_pivot_table(sars_cov_2_total_RSCU_dataframe, 'RSCU')
-print(sars_cov_2_seq1_pivot_table)
-sns.heatmap(sars_cov_2_seq1_pivot_table, cmap=plt.cm.Reds, linewidths=0.01)
-# plt.bar(codons, Obsi, color='pink')
-# plt.xticks(fontsize=7)
-plt.show()
-# Todo 正则表达式
+# sars_cov_2_total = sars_cov_2.generate_dataframe_total()
+sars_cov_2_seq1 = sars_cov_2.generate_dataframe('ENSSAST00005000002.1 cds primary_assembly:ASM985889v3:MN908947.3:266:21555:1 gene:ENSSASG00005000002.1 gene_biotype:protein_coding transcript_biotype:protein_coding gene_symbol:ORF1ab description:ORF1a polyprotein;ORF1ab polyprotein [Source:NCBI gene (formerly Entrezgene);Acc:43740578]')
+sars_cov_2_seq1 = sars_cov_2_seq1.fillna('*')
+
+Homo_sapiens_table = pd.read_excel('Reference_species/Homo_sapiens.xlsx')
+Homo_sapiens_table = Homo_sapiens_table.fillna('*')
+table_index = 0
+for table_codon in Homo_sapiens_table['codon']:
+    dna_codon = Seq(table_codon)  # Extract a sequence
+    rna_codon = dna_codon.transcribe()  # Transcribed into mRNA
+    # Homo_sapiens_table.loc[Homo_sapiens_table['codon'][table_index]] = str(table_codon)
+    Homo_sapiens_table.loc[Homo_sapiens_table['codon'] == table_codon, 'codon'] = str(rna_codon)
+    table_index += 1
+
+wij_dataframe = pd.DataFrame(columns=('codon', 'wij'))
+for wij_codon in sars_cov_2_seq1['codon']:
+    rac_amino_acid = list(sars_cov_2_seq1[(sars_cov_2_seq1['codon'] == wij_codon)]['amino_acid'])[0]
+    large_codon = Homo_sapiens_table.loc[Homo_sapiens_table['amino_acid'] == rac_amino_acid].sort_values(by='Obsi', ascending=False).reset_index(drop=True)['codon'][0]
+    wij = int(Homo_sapiens_table[Homo_sapiens_table.codon == wij_codon]['Obsi']) / int(Homo_sapiens_table[Homo_sapiens_table.codon == large_codon]['Obsi'])
+    wij_dataframe = wij_dataframe.append(pd.DataFrame({'codon': [wij_codon], 'wij': [wij]}), ignore_index=True)
+cai_numerator = 0
+cai_denominator = 0
+for fij_codon in sars_cov_2_seq1['codon']:
+    cai_numerator = cai_numerator + int(sars_cov_2_seq1[sars_cov_2_seq1.codon == fij_codon]['Obsi']) * np.log(float(wij_dataframe[wij_dataframe.codon == fij_codon]['wij']))
+    cai_denominator = cai_denominator + int(sars_cov_2_seq1[sars_cov_2_seq1.codon == fij_codon]['Obsi'])
+print(cai_numerator)
+print(cai_denominator)
+cai = math.exp(cai_numerator/cai_denominator)
+print(cai)

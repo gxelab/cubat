@@ -1,0 +1,84 @@
+Output of codon adaptation index (CAI) from DAMBE
+(Xia, X. 2007. An Improved Implementation of Codon Adaptation Index. Evolutionary Bioinformatics 3:53¨C58.)
+
+Reference species: Homo sapiens                                                                    
+Note: CAI is the conventional codon adaptation index, CAI2 is simply Sum[CodonFreq(J)*w(J)]/Sum[CodonFreq(J)], which does not have the problem involving w(J) = 0.
+
+
+Please note that w is obtained from a set of highly expressed genes,
+not from your input sequences.Output for sequence: ENSSAST00005000002.1
+Codon  AA   ObsFreq         w
+=================================
+  UGA   *         0     0.000
+  UAG   *         0     0.000
+  UAA   *         1     0.000
+  GCU   A       269     0.653
+  GCG   A        16     0.266
+  GCC   A        71     1.000
+  GCA   A       131     0.560
+  UGU   C       184     0.813
+  UGC   C        42     1.000
+  GAU   D       251     0.856
+  GAC   D       138     1.000
+  GAG   E        92     1.000
+  GAA   E       248     0.715
+  UUU   F       254     0.831
+  UUC   F        95     1.000
+  GGU   G       263     0.474
+  GGG   G        10     0.731
+  GGC   G        63     1.000
+  GGA   G        76     0.720
+  CAC   H        43     1.000
+  CAU   H       102     0.703
+  AUU   I       169     0.741
+  AUA   I       117     0.339
+  AUC   I        57     1.000
+  AAA   K       281     0.739
+  AAG   K       153     1.000
+  UUG   L       116     1.000
+  UUA   L       201     0.576
+  CUA   L        77     0.174
+  CUC   L        61     0.489
+  CUG   L        28     1.000
+  CUU   L       185     0.319
+  AUG   M       168     0.000
+  AAC   N       116     1.000
+  AAU   N       268     0.865
+  CCA   P       111     0.834
+  CCC   P        17     1.000
+  CCU   P       136     0.864
+  CCG   P        10     0.351
+  CAA   Q       163     0.345
+  CAG   Q        76     1.000
+  AGG   R        31     1.000
+  AGA   R       112     0.993
+  CGG   R         7     1.000
+  CGC   R        25     0.916
+  CGA   R        10     0.532
+  CGU   R        59     0.394
+  UCA   S       128     0.675
+  UCC   S        27     1.000
+  UCG   S         5     0.253
+  UCU   S       154     0.840
+  AGC   S        23     1.000
+  AGU   S       119     0.614
+  ACC   T        47     1.000
+  ACA   T       224     0.774
+  ACG   T        24     0.320
+  ACU   T       232     0.674
+  GUU   V       292     0.380
+  GUG   V        88     1.000
+  GUC   V        81     0.511
+  GUA   V       137     0.244
+  UGG   W        78     0.000
+  UAC   Y       127     1.000
+  UAU   Y       208     0.778
+=================================
+CAI = 0.6772
+
+CAI2 = 0.7227
+
+
+Mean                             0.67716   0.72274
+STD                              0.00000   0.00000
+
