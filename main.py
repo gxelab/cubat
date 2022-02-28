@@ -1,12 +1,13 @@
 import re
 # import os
-import math
+# import math
 import pandas as pd
 import numpy as np
 # import seaborn as sns
 # import matplotlib.pyplot as plt
 from Bio.Seq import Seq
 from Bio.Data import CodonTable
+import Bio.Data.CodonTable
 
 
 class Cubat:
@@ -131,7 +132,7 @@ class Cubat:
         merged_dataframe = codon_dataframe.merge(amino_dataframe, left_index=True, right_index=True)
         cols = merged_dataframe.columns[[0, 2, 1]]
         dataframe = merged_dataframe[cols]
-        return dataframe
+        return dataframe.fillna('*')
 
     def generate_dataframe_total(self):
         return Cubat.generate_dataframe(self, (self.filename + '(total sequences)'))
@@ -197,38 +198,44 @@ class Cubat:
         print(type(pivot_table))
         return pivot_table
 
-    # @staticmethod
-    # def cai(seq_dataframe, high_expression_gene_table):
-    #     return '---'
+    @staticmethod
+    def cai(seq_dataframe, high_expression_gene_table=pd.read_excel('Reference_species/Homo_sapiens.xlsx')):
+        high_expression_gene_table = high_expression_gene_table.fillna('*')
+        table_index = 0
+        for table_codon in high_expression_gene_table['codon']:
+            dna_codon = Seq(table_codon)  # Extract a sequence
+            rna_codon = dna_codon.transcribe()  # Transcribed into mRNA
+            # high_expression_gene_table.loc[high_expression_gene_table['codon'][table_index]] = str(table_codon)
+            high_expression_gene_table.loc[high_expression_gene_table['codon'] == table_codon, 'codon'] = str(rna_codon)
+            table_index += 1
+
+        wij_dataframe = pd.DataFrame(columns=('codon', 'wij'))
+        for wij_codon in seq_dataframe['codon']:
+
+            wij_amino_acid = list(seq_dataframe[(seq_dataframe['codon'] == wij_codon)]['amino_acid'])[0]
+            large_codon = high_expression_gene_table.loc[
+                high_expression_gene_table['amino_acid'] == wij_amino_acid
+            ].sort_values(by='Obsi', ascending=False).reset_index(drop=True)['codon'][0]
+
+            wij = int(high_expression_gene_table[high_expression_gene_table.codon == wij_codon]['Obsi']) / int(
+                high_expression_gene_table[high_expression_gene_table.codon == large_codon]['Obsi'])
+            wij_dataframe = wij_dataframe.append(pd.DataFrame({'codon': [wij_codon], 'wij': [wij]}), ignore_index=True)
+        cai_numerator = 0
+        cai2_numerator = 0
+        cai_denominator = 0
+        for fij_codon in seq_dataframe['codon']:
+            cai_numerator = cai_numerator + int(seq_dataframe[seq_dataframe.codon == fij_codon]['Obsi']) * np.log(
+                float(wij_dataframe[wij_dataframe.codon == fij_codon]['wij']))
+            cai2_numerator = cai2_numerator + int(seq_dataframe[seq_dataframe.codon == fij_codon]['Obsi']) * float(
+                wij_dataframe[wij_dataframe.codon == fij_codon]['wij'])
+            cai_denominator = cai_denominator + int(seq_dataframe[seq_dataframe.codon == fij_codon]['Obsi'])
+        cai = np.exp(cai_numerator / cai_denominator)
+        cai2 = cai2_numerator / cai_denominator
+        return cai, cai2
 
 
 sars_cov_2 = Cubat('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta')
-# sars_cov_2_total = sars_cov_2.generate_dataframe_total()
-sars_cov_2_seq1 = sars_cov_2.generate_dataframe('ENSSAST00005000002.1 cds primary_assembly:ASM985889v3:MN908947.3:266:21555:1 gene:ENSSASG00005000002.1 gene_biotype:protein_coding transcript_biotype:protein_coding gene_symbol:ORF1ab description:ORF1a polyprotein;ORF1ab polyprotein [Source:NCBI gene (formerly Entrezgene);Acc:43740578]')
-sars_cov_2_seq1 = sars_cov_2_seq1.fillna('*')
+sars_cov_2_total = sars_cov_2.generate_dataframe_total()
+sars_cov_2_seq1 = sars_cov_2.generate_dataframe('ENSSAST00005000003.1 cds primary_assembly:ASM985889v3:MN908947.3:266:13483:1 gene:ENSSASG00005000003.1 gene_biotype:protein_coding transcript_biotype:protein_coding gene_symbol:ORF1ab description:ORF1a polyprotein;ORF1ab polyprotein [Source:NCBI gene (formerly Entrezgene);Acc:43740578]')
 
-Homo_sapiens_table = pd.read_excel('Reference_species/Homo_sapiens.xlsx')
-Homo_sapiens_table = Homo_sapiens_table.fillna('*')
-table_index = 0
-for table_codon in Homo_sapiens_table['codon']:
-    dna_codon = Seq(table_codon)  # Extract a sequence
-    rna_codon = dna_codon.transcribe()  # Transcribed into mRNA
-    # Homo_sapiens_table.loc[Homo_sapiens_table['codon'][table_index]] = str(table_codon)
-    Homo_sapiens_table.loc[Homo_sapiens_table['codon'] == table_codon, 'codon'] = str(rna_codon)
-    table_index += 1
 
-wij_dataframe = pd.DataFrame(columns=('codon', 'wij'))
-for wij_codon in sars_cov_2_seq1['codon']:
-    rac_amino_acid = list(sars_cov_2_seq1[(sars_cov_2_seq1['codon'] == wij_codon)]['amino_acid'])[0]
-    large_codon = Homo_sapiens_table.loc[Homo_sapiens_table['amino_acid'] == rac_amino_acid].sort_values(by='Obsi', ascending=False).reset_index(drop=True)['codon'][0]
-    wij = int(Homo_sapiens_table[Homo_sapiens_table.codon == wij_codon]['Obsi']) / int(Homo_sapiens_table[Homo_sapiens_table.codon == large_codon]['Obsi'])
-    wij_dataframe = wij_dataframe.append(pd.DataFrame({'codon': [wij_codon], 'wij': [wij]}), ignore_index=True)
-cai_numerator = 0
-cai_denominator = 0
-for fij_codon in sars_cov_2_seq1['codon']:
-    cai_numerator = cai_numerator + int(sars_cov_2_seq1[sars_cov_2_seq1.codon == fij_codon]['Obsi']) * np.log(float(wij_dataframe[wij_dataframe.codon == fij_codon]['wij']))
-    cai_denominator = cai_denominator + int(sars_cov_2_seq1[sars_cov_2_seq1.codon == fij_codon]['Obsi'])
-print(cai_numerator)
-print(cai_denominator)
-cai = math.exp(cai_numerator/cai_denominator)
-print(cai)
