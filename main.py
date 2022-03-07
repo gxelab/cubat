@@ -7,7 +7,7 @@ import numpy as np
 # import matplotlib.pyplot as plt
 from Bio.Seq import Seq
 from Bio.Data import CodonTable
-import Bio.Data.CodonTable
+# import Bio.Data.CodonTable
 
 
 class Cubat:
@@ -219,6 +219,7 @@ class Cubat:
 
             wij = int(high_expression_gene_table[high_expression_gene_table.codon == wij_codon]['Obsi']) / int(
                 high_expression_gene_table[high_expression_gene_table.codon == large_codon]['Obsi'])
+
             wij_dataframe = wij_dataframe.append(pd.DataFrame({'codon': [wij_codon], 'wij': [wij]}), ignore_index=True)
         cai_numerator = 0
         cai2_numerator = 0
@@ -234,8 +235,40 @@ class Cubat:
         return cai, cai2
 
 
-sars_cov_2 = Cubat('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta')
-sars_cov_2_total = sars_cov_2.generate_dataframe_total()
-sars_cov_2_seq1 = sars_cov_2.generate_dataframe('ENSSAST00005000003.1 cds primary_assembly:ASM985889v3:MN908947.3:266:13483:1 gene:ENSSASG00005000003.1 gene_biotype:protein_coding transcript_biotype:protein_coding gene_symbol:ORF1ab description:ORF1a polyprotein;ORF1ab polyprotein [Source:NCBI gene (formerly Entrezgene);Acc:43740578]')
+Brewer_yeast = Cubat('Test_Data/CSC_test/csc_test_total5.fna')
+Brewer_yeast_total = Brewer_yeast.generate_dataframe_total()
+mrna_hl = pd.read_excel('Test_Data/CSC_test/mrna_life_time.xlsx')  # Half-life of mrna
+
+# Generate a dictionary of sequence information and mrna half-life.
+csc_index = 0
+csc_correspondence = {}
+for info in list(Brewer_yeast.correspondence.keys())[0:5]:
+    csc_correspondence[info] = list(pd.read_excel(
+        'Test_Data/CSC_test/mrna_life_time.xlsx')['Total Half-life'])[csc_index]
+    csc_index = csc_index + 1
+
+# Initialize and allocate memory space.
+for csc_codon in Brewer_yeast_total['codon']:
+    locals()['csc_' + str(csc_codon)] = []
+    locals()['mrna_hf_' + str(csc_codon)] = []
+
+# Store the frequency of codons in the list.
+for info in list(Brewer_yeast.correspondence.keys())[0:5]:
+    for csc_codon in Brewer_yeast.generate_dataframe(info)['codon']:
+        locals()['csc_' + str(csc_codon)].append(
+            int(Brewer_yeast.generate_dataframe(info).loc[
+                    Brewer_yeast.generate_dataframe(info).codon == csc_codon]['Obsi']))
+        locals()['mrna_hf_' + str(csc_codon)].append(csc_correspondence[info])
+csc_dataframe = pd.DataFrame(columns=('codon', 'csc'))
+for csc_codon in Brewer_yeast_total['codon']:
+    locals()['codon_Obsi_list_' + str(csc_codon)] = np.array(locals()['csc_' + str(csc_codon)])
+    locals()['mrna_hf_list_' + str(csc_codon)] = np.array(locals()['mrna_hf_' + str(csc_codon)])
+    if len(locals()['mrna_hf_list_' + str(csc_codon)]) > 1 and len(locals()['codon_Obsi_list_' + str(csc_codon)]) > 1:
+        csc = np.corrcoef(locals()['codon_Obsi_list_' + str(csc_codon)], locals()['mrna_hf_list_' + str(csc_codon)])[
+            0, 1]
+        csc_dataframe = csc_dataframe.append(pd.DataFrame({'codon': [csc_codon], 'csc': [csc]}), ignore_index=True)
+print(csc_dataframe)
+# print(csc_correspondence)
+# pccs = np.corrcoef(x, y)  # Pearson correlation coefficient
 
 
