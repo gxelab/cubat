@@ -8,6 +8,8 @@ import numpy as np
 from Bio.Seq import Seq
 from Bio.Data import CodonTable
 from Bio import SeqIO
+
+
 # import Bio.Data.CodonTable
 
 
@@ -16,43 +18,43 @@ class Cubat:
     sequences = []
     total_sequences = ''
     part_name = []
-    length=0
-    times=0
+    length = 0
+    times = 0
     genecode = 0
 
     def __init__(self, data_path, gene_code=1):
         self.data_path = data_path
         fasta_list = list(SeqIO.parse(data_path, "fasta"))
-        self.length=len(fasta_list)
-        self.genecode=gene_code
+        self.length = len(fasta_list)
+        self.genecode = gene_code
         for i in fasta_list:
             self.name.append(i.name)
             self.sequences.append(i.seq)
         codon_table = CodonTable.unambiguous_dna_by_id[gene_code]
         self.codon_table_forward_table = codon_table.forward_table
         self.codon_table = codon_table
-        self.part_name=[]
+        self.part_name = []
         Cubat.get_data(self, self.data_path)
 
-#     def get_data(self, data_path):
-#         # Extract sequences and merge into one line string
-#         data = open(data_path, 'rb').read().decode('utf-8')  # Open file
-#         sequence = re.findall(r']((?:.|\n)*?)>', data)
-#         names = re.findall(r'>((?:.|\n)*?)]', data)
-#         for dna_seq in sequence:
-#             locals()['info' + str(Cubat.i)] = names[Cubat.i] + ']'
-#             locals()['seq' + str(Cubat.i)] = dna_seq
-#             locals()['seq' + str(Cubat.i)] = [seq.strip() for seq in locals()['seq' + str(Cubat.i)]]  # Remove '\n'
-#             locals()['seq' + str(Cubat.i)] = ''.join(locals()['seq' + str(Cubat.i)])  # Merge into one line string
-#             # Cubat.total_sequences.update = ''
-#             Cubat.correspondence.update({locals()['info' + str(Cubat.i)]: locals()['seq' + str(Cubat.i)]})
-#             Cubat.sequence_number.update({locals()['info' + str(Cubat.i)]: str(Cubat.i)})
-#             Cubat.sequences.update({Cubat.i: locals()['seq' + str(Cubat.i)]})
-#             Cubat.total_sequences = Cubat.total_sequences + ''.join(locals()['seq' + str(Cubat.i)])
-#             Cubat.i += 1
-#         Cubat.correspondence.update({(self.filename + '(total sequences)'): Cubat.total_sequences})
-#         Cubat.sequence_number.update({(self.filename + '(total sequences)'): 'total'})
-#         return Cubat.sequences
+    #     def get_data(self, data_path):
+    #         # Extract sequences and merge into one line string
+    #         data = open(data_path, 'rb').read().decode('utf-8')  # Open file
+    #         sequence = re.findall(r']((?:.|\n)*?)>', data)
+    #         names = re.findall(r'>((?:.|\n)*?)]', data)
+    #         for dna_seq in sequence:
+    #             locals()['info' + str(Cubat.i)] = names[Cubat.i] + ']'
+    #             locals()['seq' + str(Cubat.i)] = dna_seq
+    #             locals()['seq' + str(Cubat.i)] = [seq.strip() for seq in locals()['seq' + str(Cubat.i)]]  # Remove '\n'
+    #             locals()['seq' + str(Cubat.i)] = ''.join(locals()['seq' + str(Cubat.i)])  # Merge into one line string
+    #             # Cubat.total_sequences.update = ''
+    #             Cubat.correspondence.update({locals()['info' + str(Cubat.i)]: locals()['seq' + str(Cubat.i)]})
+    #             Cubat.sequence_number.update({locals()['info' + str(Cubat.i)]: str(Cubat.i)})
+    #             Cubat.sequences.update({Cubat.i: locals()['seq' + str(Cubat.i)]})
+    #             Cubat.total_sequences = Cubat.total_sequences + ''.join(locals()['seq' + str(Cubat.i)])
+    #             Cubat.i += 1
+    #         Cubat.correspondence.update({(self.filename + '(total sequences)'): Cubat.total_sequences})
+    #         Cubat.sequence_number.update({(self.filename + '(total sequences)'): 'total'})
+    #         return Cubat.sequences
 
     @staticmethod
     def cut(obj, sec):
@@ -83,14 +85,14 @@ class Cubat:
     # def process_mrna_seq(cut_seq, stop_codon_location):
     #     return cut_seq[0:stop_codon_location]
 
-#     @staticmethod
-#     def count_codon(processed_mrna_seq):
-#         # Convert mRNA_seq into dataframe of pandas
-#         codon_series = pd.value_counts(processed_mrna_seq)
-#         codon_dic = {'codon': codon_series.index, 'Obsi': codon_series.values}
-#         # Obsi = Observed number of occurrences of codon 'i'
-#         codon_dataframe = pd.DataFrame(codon_dic)
-#         return codon_dataframe
+    #     @staticmethod
+    #     def count_codon(processed_mrna_seq):
+    #         # Convert mRNA_seq into dataframe of pandas
+    #         codon_series = pd.value_counts(processed_mrna_seq)
+    #         codon_dic = {'codon': codon_series.index, 'Obsi': codon_series.values}
+    #         # Obsi = Observed number of occurrences of codon 'i'
+    #         codon_dataframe = pd.DataFrame(codon_dic)
+    #         return codon_dataframe
 
     @staticmethod
     def count_codon(seq_list):
@@ -112,7 +114,6 @@ class Cubat:
         codon_array = np.array(list(codon_num.values()))
         return codon_array
 
-
     def generate_amino_dataframe(self, codon_dataframe):
         # codon_table = CodonTable.unambiguous_rna_by_id[1].forward_table
         amino_acid = codon_dataframe['codon'].map(self.codon_table_forward_table)
@@ -120,53 +121,52 @@ class Cubat:
         amino_dataframe = pd.DataFrame(amino_dic)
         return amino_dataframe
 
-#     def generate_dataframe(self, data_info):
-#         data = Cubat.correspondence[data_info]
-#         dna_seq = Seq(data)  # Extract a sequence
-#         mrna_seq = dna_seq.transcribe()  # Transcribed into mRNA
-#         if len(dna_seq) % 3 != 0:  # Determine whether the sequence is a multiple of 3.
-#             print(data_info)
-#             print('\033[33m%s\033[0m' % 'Warning: the sequence is not a multiple of 3.')
-#         cut_seq = Cubat.cut(str(mrna_seq), 3)  # Cutting RNA sequence
-#         codon_dataframe = Cubat.count_codon(cut_seq)
-#         # Determine whether the sequence starts with the start codon in the codon table.
-#         if cut_seq[0] not in self.codon_table.start_codons:
-#             print(data_info)
-#             print('\033[33m%s\033[0m' % 'Warning: The first codon is not the start codon in the codon table.')
+    #     def generate_dataframe(self, data_info):
+    #         data = Cubat.correspondence[data_info]
+    #         dna_seq = Seq(data)  # Extract a sequence
+    #         mrna_seq = dna_seq.transcribe()  # Transcribed into mRNA
+    #         if len(dna_seq) % 3 != 0:  # Determine whether the sequence is a multiple of 3.
+    #             print(data_info)
+    #             print('\033[33m%s\033[0m' % 'Warning: the sequence is not a multiple of 3.')
+    #         cut_seq = Cubat.cut(str(mrna_seq), 3)  # Cutting RNA sequence
+    #         codon_dataframe = Cubat.count_codon(cut_seq)
+    #         # Determine whether the sequence starts with the start codon in the codon table.
+    #         if cut_seq[0] not in self.codon_table.start_codons:
+    #             print(data_info)
+    #             print('\033[33m%s\033[0m' % 'Warning: The first codon is not the start codon in the codon table.')
 
-#             # Otherwise, a function for locating the start codon will be called.
-#             start_codon = input('Please enter the start codon you need.')
-#             try:
-#                 located_seq = Cubat.locate_start_codon(start_codon, mrna_seq)
-#             except AttributeError:
-#                 print('\033[31m%s\033[0m' % 'Error: the start codon was not found.')
-#             else:
-#                 cut_seq = Cubat.cut(located_seq, 3)  # Cutting RNA sequence
+    #             # Otherwise, a function for locating the start codon will be called.
+    #             start_codon = input('Please enter the start codon you need.')
+    #             try:
+    #                 located_seq = Cubat.locate_start_codon(start_codon, mrna_seq)
+    #             except AttributeError:
+    #                 print('\033[31m%s\033[0m' % 'Error: the start codon was not found.')
+    #             else:
+    #                 cut_seq = Cubat.cut(located_seq, 3)  # Cutting RNA sequence
 
-#         # Determine whether the sequence ends with the stop codon in the codon table.
-#         if cut_seq[-1] not in self.codon_table.stop_codons:
-#             print(data_info)
-#             print('\033[33m%s\033[0m' % 'Warning: last codon is not stop codon.')
+    #         # Determine whether the sequence ends with the stop codon in the codon table.
+    #         if cut_seq[-1] not in self.codon_table.stop_codons:
+    #             print(data_info)
+    #             print('\033[33m%s\033[0m' % 'Warning: last codon is not stop codon.')
 
-#             # Otherwise, a function for locating the stop codon will be called.
-#             stop_codon = input('Please enter the stop codon you need.')
-#             try:
-#                 stop_codon_location = cut_seq.index(stop_codon) + 1
-#                 processed_mrna_seq = cut_seq[0:stop_codon_location]
-#             except ValueError:
-#                 print('\033[31m%s\033[0m' % 'Error: the stop codon was not found.')
-#             else:
-#                 codon_dataframe = Cubat.count_codon(processed_mrna_seq)
+    #             # Otherwise, a function for locating the stop codon will be called.
+    #             stop_codon = input('Please enter the stop codon you need.')
+    #             try:
+    #                 stop_codon_location = cut_seq.index(stop_codon) + 1
+    #                 processed_mrna_seq = cut_seq[0:stop_codon_location]
+    #             except ValueError:
+    #                 print('\033[31m%s\033[0m' % 'Error: the stop codon was not found.')
+    #             else:
+    #                 codon_dataframe = Cubat.count_codon(processed_mrna_seq)
 
-#         amino_dataframe = Cubat.generate_amino_dataframe(self, codon_dataframe)
-#         merged_dataframe = codon_dataframe.merge(amino_dataframe, left_index=True, right_index=True)
-#         cols = merged_dataframe.columns[[0, 2, 1]]
-#         dataframe = merged_dataframe[cols]
-#         return dataframe.fillna('*')
+    #         amino_dataframe = Cubat.generate_amino_dataframe(self, codon_dataframe)
+    #         merged_dataframe = codon_dataframe.merge(amino_dataframe, left_index=True, right_index=True)
+    #         cols = merged_dataframe.columns[[0, 2, 1]]
+    #         dataframe = merged_dataframe[cols]
+    #         return dataframe.fillna('*')
 
     def get_sequences(self, data_info=None, method="all"):
         data_input = []
-
 
         if method == "part":
             if type(data_info) == int:
@@ -175,9 +175,9 @@ class Cubat:
 
             if type(data_info) == str:
                 try:
-                    index=Cubat.name.index(data_info)
+                    index = Cubat.name.index(data_info)
                 except ValueError:
-                    print("ERROR.Its that we cant find the name you signed in" )
+                    print("ERROR.Its that we cant find the name you signed in")
                 data_input.append(self.sequences[index])
                 self.part_name.append(data_info)
 
@@ -202,12 +202,11 @@ class Cubat:
 
         return data_input
 
-
-    def process_data(self,data_input, QC=False):
-        lack_start = np.zeros( self.times, dtype=np.bool_)
+    def process_data(self, data_input, QC=False):
+        lack_start = np.zeros(self.times, dtype=np.bool_)
         rearr = np.zeros((self.times, 64), dtype=float)
         for t in range(0, self.times):
-            seq_str=str(data_input[t])
+            seq_str = str(data_input[t])
             seq_list = re.findall('.{3}', seq_str)
             if QC and seq_list[0] not in self.codon_table.start_codons:
                 lack_start[t] = True
@@ -231,30 +230,30 @@ class Cubat:
                                                 'GAA', 'GAG', 'GGT', 'GGC', 'GGA', 'GGG'], index=self.part_name)
         return codon_dataframe
 
-    def generate_dataframe(self, data_input, quality_control=True,enc=True):
-        result_dataframe=pd.DataFrame()
+    def generate_dataframe(self, data_input, quality_control=True, enc=True):
+        result_dataframe = pd.DataFrame()
 
         if quality_control:
-            count_arr, lack_start, not_mut3, inner_stop = Cubat.process_data(self,data_input, QC=True)
-            concat=np.array([lack_start,not_mut3,inner_stop]).T
-            QC_dataframe=pd.DataFrame(concat,columns=['lack_start_codon','not_multipler_of_3','inner_stop_codon'],index=self.part_name)
-            result_dataframe=pd.concat([result_dataframe,QC_dataframe],axis=1)
+            count_arr, lack_start, not_mut3, inner_stop = Cubat.process_data(self, data_input, QC=True)
+            concat = np.array([lack_start, not_mut3, inner_stop]).T
+            QC_dataframe = pd.DataFrame(concat, columns=['lack_start_codon', 'not_multipler_of_3', 'inner_stop_codon'],
+                                        index=self.part_name)
+            result_dataframe = pd.concat([result_dataframe, QC_dataframe], axis=1)
 
 
         else:
-            count_arr = Cubat.process_data(self,data_input,QC=False)
+            count_arr = Cubat.process_data(self, data_input, QC=False)
 
         if enc:
-            enc_arr = Cubat.enc(self, count_arr,1).T
-            enc_dataframe=pd.DataFrame(enc_arr,columns=['enc'],index=self.part_name)
-            result_dataframe = pd.concat([result_dataframe, enc_dataframe],axis=1)
+            enc_arr = Cubat.enc(self, count_arr, 1).T
+            enc_dataframe = pd.DataFrame(enc_arr, columns=['enc'], index=self.part_name)
+            result_dataframe = pd.concat([result_dataframe, enc_dataframe], axis=1)
 
         return result_dataframe
 
-
-    def enc(self,frequency_array, genecode=1):
-        if type(frequency_array)==tuple:
-            frequency_array=frequency_array[0]
+    def enc(self, frequency_array, genecode=1):
+        if type(frequency_array) == tuple:
+            frequency_array = frequency_array[0]
         process_arr = np.delete(frequency_array, code_del[genecode], axis=1)
         FcF_array, an_array = np.empty((21, self.times), dtype=float), np.empty((21, self.times), dtype=float)
         fly = len(all_24familys)
@@ -277,7 +276,6 @@ class Cubat:
         enc_array = code_ns[genecode] + family2sum + family3sum + family4sum
 
         return enc_array
-
 
     def generate_dataframe_total(self):
         return Cubat.generate_dataframe(self, (self.filename + '(total sequences)'))
@@ -356,11 +354,10 @@ class Cubat:
 
         wij_dataframe = pd.DataFrame(columns=('codon', 'wij'))
         for wij_codon in seq_dataframe['codon']:
-
             wij_amino_acid = list(seq_dataframe[(seq_dataframe['codon'] == wij_codon)]['amino_acid'])[0]
             large_codon = high_expression_gene_table.loc[
                 high_expression_gene_table['amino_acid'] == wij_amino_acid
-            ].sort_values(by='Obsi', ascending=False).reset_index(drop=True)['codon'][0]
+                ].sort_values(by='Obsi', ascending=False).reset_index(drop=True)['codon'][0]
 
             wij = int(high_expression_gene_table[high_expression_gene_table.codon == wij_codon]['Obsi']) / int(
                 high_expression_gene_table[high_expression_gene_table.codon == large_codon]['Obsi'])
