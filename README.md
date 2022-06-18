@@ -1,2 +1,2 @@
-This project currently is a python packge for codwn usage bias alalysis.
+This project currently is a python package for codon usage bias analysis. 
 ![](Cubat.jpg)
