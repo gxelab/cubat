@@ -99,18 +99,11 @@ def rscu(codon_dataframe):
     rscu_dataframe = pd.DataFrame(columns=codon_dataframe.columns, index=codon_dataframe.index)
     for codon in codon_dataframe.columns:
         try:
-            for seq in codon_dataframe.index:
-                # /
-                amino_acid_value = CodonTable.standard_dna_table.forward_table[codon]
-                rscu_amino_acid = \
-                    [key for key, value in CodonTable.standard_dna_table.forward_table.items() if
-                     value == amino_acid_value]
-                codon_frequency = 0
-                for rscu_codon in rscu_amino_acid:
-                    codon_frequency += codon_dataframe.at[seq, rscu_codon]
-                    if codon_frequency / len(rscu_amino_acid):
-                        rscu_dataframe.at[seq, codon] = \
-                            codon_dataframe.at[seq, codon] / (codon_frequency / len(rscu_amino_acid))
+            amino_acid_value = CodonTable.standard_dna_table.forward_table[codon]
+            rscu_codons = \
+                [key for key, value in CodonTable.standard_dna_table.forward_table.items() if
+                 value == amino_acid_value]
+            rscu_dataframe[codon] = codon_dataframe[codon]/(codon_dataframe[rscu_codons].sum(axis=1)/len(rscu_codons))
 
         except KeyError:
             stop_codon.append(codon)
