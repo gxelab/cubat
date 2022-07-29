@@ -84,27 +84,7 @@ class genecode_compute():
         codon_familyami__ = np.concatenate(np.nonzero(mask_ami) + ([mask_ami.size],))
         all_amifamilies__ = np.diff(codon_familyami__)
 
-        # row = [stop_codon_location__, number_of_stopcodon__, single_codon_location__, number_of_single__,
-        #        delete_location__, number_of_delete__,
-        #        codon_family24__, number_of_eachfamily__, perm__, codon_familyami__]
-        # dict={'single_codon_location':stop_codon_location__}
-        # with open('genecode_database.csv', 'a') as gd:
-        #     write = csv.writer(gd,lineterminator = '\n')
-        #     write.writerow(row)
-
-        # stop_codon_location[indexes] = stop_codon_location__
-        # number_of_stopcodon[indexes] = number_of_stopcodon__
-        # single_codon_location[indexes] = single_codon_location__
-        # number_of_single[indexes] = number_of_single__
-        # delete_location[indexes] = delete_location__
-        # number_of_delete[indexes] = number_of_delete__
-        # codon_family24[indexes] = codon_family24__
-        # all_24families[indexes] = all_24families__
-        # number_of_eachfamily[indexes] = number_of_eachfamily__
-        # sorting[indexes] = perm__
-        # codon_familyami[indexes] = codon_familyami__
-        # all_amifamilies[indexes] = all_amifamilies__
-
+       
         return (stop_codon_location__,number_of_stopcodon__,single_codon_location__,number_of_single__,delete_location__,number_of_delete__
                 ,codon_family24__,all_24families__,number_of_eachfamily__,perm__,codon_familyami__,all_amifamilies__)
 
