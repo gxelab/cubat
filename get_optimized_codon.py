@@ -34,4 +34,5 @@ def optimized_codon(processed_array, enc_array,genecode_data):
         fop_opt[i]=locate
     cbi_opt=np.nonzero(zvalue_array < (-np.sqrt(processed_array.shape[0]) / 3))[0]
     
+    
     return (fop_opt,cbi_opt)
