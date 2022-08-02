@@ -4,7 +4,7 @@ import pandas as pd
 from Bio.Data import CodonTable
 from select_parameters import select_parameters
 from optimized_codon import optimized_codon
-from genecode_compute import genecode_compute
+from genecode_data import genecode_compute
 from Bio import SeqIO
 from Bio.Seq import Seq
 
