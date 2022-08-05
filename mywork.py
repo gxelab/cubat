@@ -7,6 +7,10 @@ from optimized_codon import optimized_codon
 from genecode_data import genecode_compute
 from Bio import SeqIO
 from Bio.Seq import Seq
+import os
+import sys
+import shutil
+import ntpath
 
 
 def codon_table_completion(genecode):
@@ -355,6 +359,7 @@ def codon_bias_analyze(file_path, genecode=1, parameters=select_parameters(skip_
                        quality_control=True, rscu=True, enc=True, ite=True, X2=True,
                        fop=True, cbi=True, tai=True, cai=True, csc=False,):
 
+
     codons = ['TTT', 'TTC', 'TTA', 'TTG',
               'TCT', 'TCC', 'TCA', 'TCG',
               'TAT', 'TAC', 'TAA', 'TAG',
@@ -390,8 +395,21 @@ def codon_bias_analyze(file_path, genecode=1, parameters=select_parameters(skip_
             print('the parameter file needs to be an excel file or you may input a dataframe.')
 
     # input file
+    os.chdir(os.path.dirname(file_path))
+    # print(os.getcwd())
+    folder_name = ntpath.basename(file_path) + ".out"
+    # Check whether the folder already exists.
+    if os.path.exists(folder_name):
+        print("\033[1;33mWarning: The file already exists. If you continue, the existing file will be overwritten. \n"
+              "Do you still want to continue? [Y / N]\033[0m")
+        if input() in ["Y", "yes", "Yes", "y"]:
+            shutil.rmtree(folder_name)
+        else:
+            sys.exit(0)
 
-    file = SeqIO.parse(file_path, file_format)
+    os.makedirs(folder_name)
+
+    file = SeqIO.parse(ntpath.basename(file_path), file_format)
     information = info_preprocess(file)
 
     # count the frequency
@@ -401,7 +419,8 @@ def codon_bias_analyze(file_path, genecode=1, parameters=select_parameters(skip_
                                        columns=codons,
                                        index=np.array(information[0]))
 
-    print(frequency_dataframe)
+    # print(frequency_dataframe)
+    frequency_dataframe.to_csv(folder_name + "/frequency.csv")
 
     # compute indexes one by one
 
@@ -506,17 +525,20 @@ def codon_bias_analyze(file_path, genecode=1, parameters=select_parameters(skip_
         index_dataframe['cai'] = cai_dataframe
         index_dataframe['cai2'] = cai2_dataframe
 
-    print(index_dataframe)
+    # print(index_dataframe)
+    index_dataframe.to_csv(folder_name + "/index.csv")
 
     if rscu:
         rscu_dataframe = rscu_compute(frequency_dataframe, genecode)
         if cai:
             rscu_dataframe = rscu_dataframe.drop(columns='Total frequency')
-        print(rscu_dataframe)
+        # print(rscu_dataframe)
+        rscu_dataframe.to_csv(folder_name + "/rscu.csv")
 
     if csc:
         csc_dataframe = csc_compute(frequency_dataframe, mrna_hl_location=None)
-        print(csc_dataframe)
+        # print(csc_dataframe)
+        csc_dataframe.to_csv(folder_name + "/csc.csv")
 
     return
 
