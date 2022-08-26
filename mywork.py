@@ -758,9 +758,7 @@ class analyze():
         print('done')
         return
 
+
 if __name__ == '__main__':
-    lll = analyze('C:/Users/YuanYe/Desktop/Homo_sapiens.GRCh38.cds2.FAS', genecode=1,enc=True,ite=True,ite_ref=
-    'example/ite_ref.csv',tai=True,tai_gcn='example/tai_gcn.csv',tai_s='example/tai_s.csv',cai=True,cai_ref='example/cai_ref.csv',cbi=True,cbi_opt=
-    'example/cbi_opt.csv',fop=True,fop_opt='example/fop_opt.csv',X2=True,
-                  rscu=True, output='C:/Users/YuanYe/Desktop')
+    lll = analyze('example/csc_seq.fna', genecode=1, csc=True, csc_ref='example/csc_mranhl.csv', output='Test_Data')
     lll.plot(rscu_barplot=True)
