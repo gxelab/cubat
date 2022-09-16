@@ -523,6 +523,14 @@ def csc_compute(codon_dataframe, mrna_hl):
     return csc_dataframe
 
 
+def mrna_hl_compute(codon_dataframe, csc):
+    # Half-life of mrna
+    csc_dataframe = pd.DataFrame(columns=codon_dataframe.columns, index=["mrna_hl"])
+    for codon in csc_dataframe:
+        mrna_hl_dataframe[codon] = csc * codon_dataframe[codon].values.T
+    return mrna_hl__dataframe.sum()
+
+
 class analyze():
     enc_result = None
     ite_result = None
