@@ -1,6 +1,0 @@
-	sequnece_length	mult_of_3	start_codon	inner_stopcodon
-NC_001133.9:c151166-147594	3573	True	ATG	True
-NC_001133.9:142174-143160	987	True	ATG	True
-NC_001133.9:c138345-137698	648	True	ATG	False
-NC_001133.9:136914-137510	597	True	ATG	False
-NC_001133.9:135854-136633	780	True	ATG	False
