@@ -1,0 +1,25 @@
+# Dependencies
+highlighter: rouge
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+plugins:
+  - jekyll-redirect-from
+whitelist:
+  - jekyll-redirect-from
+
+# Setup
+title: CUBAT
+tagline: Codon Usage Bias Analysis Toolkit
+url: https://cubat-codonusagebiasanalysistoolkit.github.io
+baseurl:
+
+author:
+  name: GXElab Contributors
+  url: https://gxelab.github.io/
+
+# Custom variables for Hyde theme
+# version: "1.2"
+github:
+  repo: https://github.com/Hebin-zhang/cubat

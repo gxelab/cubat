@@ -1,0 +1,52 @@
+<div class="sidebar">
+  <!--
+  <div class="container sidebar-sticky">
+  -->
+  <div class="container">
+    <div class="sidebar-about">
+      <!--
+      <h1>
+        <a href="{{ site.baseurl }}">
+          {{ site.title }}
+        </a>
+      </h1>
+      -->
+      <div class="sidebar-logo">
+        <a href="https://cubat-codonusagebiasanalysistoolkit.github.io/">
+          <img src="/assets/images/CUBAT_logo.png" alt="CUBAT logo" title="CUBAT  Home" width="100%"/>
+        </a>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <!--
+      <a class="sidebar-nav-item{% if page.url == site.baseurl %} active{% endif %}" href="{{ site.baseurl }}">Home</a>
+      -->
+      <p class="lead">{{ site.tagline }}</p>
+      {% comment %}
+        The code below dynamically generates a sidebar nav of pages with
+        `layout: page` in the front-matter. See readme for usage.
+      {% endcomment %}
+
+      {% assign pages_list = site.pages %}
+      {% for node in pages_list %}
+        {% if node.title != null %}
+          {% if node.layout == "page" %}
+            <a class="sidebar-nav-item{% if page.url == node.url %} active{% endif %}" href="{{ node.url }}">{{ node.title }}</a>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+      <!--
+      The GitHub snapshots for each tag  misses things like compiled Tutorial.pdf
+      <a class="sidebar-nav-item" href="{{ site.github.repo }}/archive/v{{ site.version }}.zip">Download</a>
+      -->
+      <a class="sidebar-nav-item" href="{{ site.github.repo }}">GitHub project</a>
+    </nav>
+    
+  </div>
+  <!-- <div class="sidebar-footer">
+      Biopython version {{ site.version }}<br>
+      &copy; {{ site.time | date: '%Y' }}. All rights reserved.
+  </div> -->
+</div>
