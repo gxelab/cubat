@@ -17,7 +17,7 @@ CUBAT is a python program to help analyze codon usage bias(CUB). You can run it 
 
 You can calculate multiple codon bias indexes with CUBAT.​
 
-* [RSCU(relative synonymous codon usage)](https://gxelab.github.io/CUBAT//wiki/indexes/RSCU)
+* [RSCU(relative synonymous codon usage)](https://gxelab.github.io/CUBAT/wiki/indexes/RSCU)
 * ENC(effective number of codons, also called the Nc)
 * CAI(codon adaptation index)
 * CBI(codon bias index)
