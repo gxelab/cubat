@@ -1,4 +1,4 @@
- ![](\docs\mstile-150x150.png)
+ ![](/docs/mstile-150x150.png)
 
 ### Introduction
 
