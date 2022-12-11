@@ -1,7 +1,7 @@
 ---
 title: CUBAT
 permalink: /
-layout: page
+layout: wiki
 redirect_from:
  - wiki/
  - wiki/Website
