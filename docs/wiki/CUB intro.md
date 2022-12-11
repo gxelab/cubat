@@ -1,6 +1,6 @@
 ---
 title: CUB intro
-permalink: /CUBAT/CUB_intro
+permalink: wiki/CUB_intro
 layout: page
 
 ---
@@ -45,7 +45,7 @@ There are many theories explaining the origin of codons. In general, codons unde
 
 To study CUB, many scientists have proposed indexes for evaluating it. You can easily calculate the following indexes in CUBAT.
 
-- [RSCU(relative synonymous codon usage)](https://gxelab.github.io/CUBAT/ndexes/RSCU)
+- [RSCU(relative synonymous codon usage)](https://gxelab.github.io/CUBAT/wiki/indexes/RSCU)
 - ENC(effective number of codons, also called the Nc)
 - CAI(codon adaptation index)
 - CBI(codon bias index)
