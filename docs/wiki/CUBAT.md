@@ -1,7 +1,7 @@
 ---
 title: CUBAT
 permalink: /
-layout: wiki
+layout: page
 redirect_from:
  - wiki/
  - wiki/Website
@@ -15,16 +15,21 @@ redirect_from:
 
 CUBAT is a python program to help analyze codon usage bias(CUB). You can run it as a script or the command line.
 
-You can calculate multiple codon bias indexes with CUBAT.​
+### Installation
 
-* [RSCU(relative synonymous codon usage)](https://gxelab.github.io/CUBAT/wiki/indexes/RSCU)
-* ENC(effective number of codons, also called the Nc)
-* CAI(codon adaptation index)
-* CBI(codon bias index)
-* Fop (fraction of optimal codons)
-* tAI (tRNA adaption index)
-* CSC(codon stabilization coefficient)
-* the scaled χ2
+For install:
+
+```
+pip install cubat
+```
+
+For update:
+
+```
+pip install biopython --upgrade
+```
+
+You can easily calculate multiple codon bias indexes with CUBAT.​
 
 The following is a comparison with other software that can calculate CUB indexes.
 

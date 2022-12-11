@@ -1,6 +1,6 @@
 ---
 title: RSCU
-permalink: wiki/indexes/RSCU
+permalink: /indexes/RSCU
 layout: wiki
 
 ---
