@@ -1,9 +1,9 @@
 ---
 title: CUB intro
-permalink: /CUBAT/wiki/CUB_intro
+permalink: /CUBAT/CUB_intro
 layout: page
 redirect_from:
- - /CUBAT/wiki/CUB_intro
+ - /CUBAT/CUB_intro
 ---
 
 ### What is codon usage bias？
