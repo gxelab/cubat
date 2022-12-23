@@ -1,7 +1,7 @@
 ---
-title: RSCU
+title: CUB intro
 permalink: /CUBAT/CUB_intro
-layout: wiki
+layout: page
 ---
 
 ### What is codon usage bias？
@@ -52,3 +52,5 @@ To study CUB, many scientists have proposed indexes for evaluating it. You can e
 - tAI (tRNA adaption index)
 - CSC(codon stabilization coefficient)
 - the scaled χ2
+
+‍
