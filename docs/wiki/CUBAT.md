@@ -19,14 +19,14 @@ CUBAT is a python program to help analyze codon usage bias(CUB). You can run it 
 
 For install:
 
-```
+```bash
 pip install cubat
 ```
 
 For update:
 
-```
-pip install biopython --upgrade
+```bash
+pip install cubat --upgrade
 ```
 
 You can easily calculate multiple codon bias indexes with CUBAT.​
