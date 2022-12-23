@@ -1,5 +1,5 @@
 ---
-title: RSCU
+title: Codon Usage Bias(CUB) Introduction
 permalink: /CUB_intro
 layout: wiki
 ---
