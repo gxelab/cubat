@@ -2,8 +2,6 @@
 title: RSCU
 permalink: /CUBAT/indexes/RSCU
 layout: wiki
-redirect_from:
- - /CUBAT/indexes/RSCU
 ---
 
 # Introduction

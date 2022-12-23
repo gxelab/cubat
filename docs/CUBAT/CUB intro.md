@@ -2,8 +2,6 @@
 title: CUB intro
 permalink: /CUBAT/CUB_intro
 layout: page
-redirect_from:
- - /CUBAT/CUB_intro
 ---
 
 ### What is codon usage bias？
