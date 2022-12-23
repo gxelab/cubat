@@ -4,7 +4,7 @@ permalink: indexes/RSCU
 layout: wiki
 ---
 
-# Introduction
+### Introduction
 
 It is used to describe the relative usage of each codon in species (or part of species).
 
@@ -12,7 +12,7 @@ Its value ranges from 0 to 6.
 
 Methionine, tryptophan, and stop codons are usually omitted.
 
-# How to calculate?
+### How to calculate?
 
 $$
 \operatorname{RSCU}_{i j}=\frac{x_{i j}}{\frac{1}{n_{i}} \sum_{j=1}^{n_{i}} x_{i j}}
@@ -22,7 +22,7 @@ $$x_{i j}$$ is the number of occurrences of the jth codon for the ith amino acid
 
 $${\frac{1}{n_{i}} \sum_{j=1}^{n_{i}} x_{i j}}$$ is the average codon use of a codon family.
 
-# Meaning of value
+### Meaning of value
 
 * 0 refers to the absence of this codon.
 * 1 refer to this codon is no bias.
