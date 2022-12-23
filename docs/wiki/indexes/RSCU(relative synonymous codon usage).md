@@ -1,6 +1,6 @@
 ---
 title: RSCU
-permalink: /CUBAT/indexes/RSCU
+permalink: indexes/RSCU
 layout: wiki
 ---
 
