@@ -1,5 +1,5 @@
 ---
-title: Codon Usage Bias(CUB) Introduction
+title: Codon Usage Bias Introduction
 permalink: /CUB_intro
 layout: wiki
 ---
