@@ -45,10 +45,10 @@ There are many theories explaining the origin of codons. In general, codons unde
 To study CUB, many scientists have proposed indexes for evaluating it. You can easily calculate the following indexes in CUBAT.
 
 - [RSCU(relative synonymous codon usage)](https://gxelab.github.io/CUBAT/indexes/RSCU)
-- ENC(effective number of codons, also called the Nc)
-- CAI(codon adaptation index)
-- CBI(codon bias index)
-- Fop (fraction of optimal codons)
-- tAI (tRNA adaption index)
-- CSC(codon stabilization coefficient)
-- the scaled χ2
+- [ENC(effective number of codons, also called the Nc)](https://gxelab.github.io/CUBAT/indexes/ENC)
+- [CAI(codon adaptation index)](https://gxelab.github.io/CUBAT/indexes/CAI)
+- [CBI(codon bias index)](https://gxelab.github.io/CUBAT/indexes/CBI)
+- [Fop (fraction of optimal codons)](https://gxelab.github.io/CUBAT/indexes/FOP)
+- [tAI (tRNA adaption index)](https://gxelab.github.io/CUBAT/indexes/TAI)
+- [CSC(codon stabilization coefficient)](https://gxelab.github.io/CUBAT/indexes/CSC)
+- [the scaled χ2](https://gxelab.github.io/CUBAT/indexes/X2)
