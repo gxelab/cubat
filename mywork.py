@@ -149,7 +149,8 @@ def optimized_codon(processed_array, enc_array, genecode_data):
         locate += codon_familyami[i]
         fop_opt[i] = locate
     cbi_opt = np.nonzero(zvalue_array < (-np.sqrt(processed_array.shape[0]) / 3))[0]
-    return (fop_opt, cbi_opt)
+    return_tuple = (fop_opt, cbi_opt)
+    return return_tuple
 
 
 def codon_table_completion(genecode):
@@ -182,27 +183,37 @@ def codon_table_completion(genecode):
     return complete_codon_table
 
 
-def info_preprocess(parse_data):
-    data = list(parse_data)
-    id_list = []
-    sequence_length_list = []
-    frequency_check = []
-    start_codon_check = []
-    seq_list = []
-    description = []
+def info_preprocess(input_path, file_format):
+    if file_format not in ['csv', 'save']:
+        id_list = []
+        sequence_length_list = []
+        frequency_check = []
+        start_codon_check = []
+        seq_list = []
+        description = []
+        parse_data = SeqIO.parse(input_path, file_format)
+        data = list(parse_data)
 
-    # todo 这可能是主要的限速步骤，有机会看看能不能不用for loop。
-    for record in data:
-        id_list.append(record.name)
-        sequence_length_list.append(len(record.seq))
-        start_codon_check.append(str(record.seq[0:3]))
-        seq_list.append(str(record.seq))
-        description.append(record.description)
+        # todo 这可能是主要的限速步骤，有机会看看能不能不用for loop。
+        for record in data:
+            id_list.append(record.name)
+            sequence_length_list.append(len(record.seq))
+            start_codon_check.append(str(record.seq[0:3]))
+            seq_list.append(str(record.seq))
+            description.append(record.description)
 
-        if len(record.seq) % 3 == 0:
-            frequency_check.append("True")
-        else:
-            frequency_check.append("False")
+            if len(record.seq) % 3 == 0:
+                frequency_check.append("True")
+            else:
+                frequency_check.append("False")
+    else:
+        saved_dataframe = pd.read_csv(input_path, index_col=0)
+        seq_list = saved_dataframe[saved_dataframe.columns[4:68]].to_numpy()
+        id_list = list(saved_dataframe.index)
+        description = saved_dataframe[saved_dataframe.columns[3]].tolist()
+        sequence_length_list = saved_dataframe[saved_dataframe.columns[2]].tolist()
+        frequency_check = saved_dataframe[saved_dataframe.columns[1]].tolist()
+        start_codon_check = saved_dataframe[saved_dataframe.columns[0]].tolist()
 
     info_tuple = (id_list, seq_list, description, sequence_length_list, frequency_check, start_codon_check)
 
@@ -507,8 +518,8 @@ def cai_compute(processed_array, reference, genecode_data):
     multi_array = np.sum(np.multiply(processed_array, np.log(W_array)), axis=1)
     cai_array = np.exp(multi_array / all_codon)
     cai2_array = np.sum(np.multiply(processed_array, W_array), axis=1) / all_codon
-
-    return (cai_array, cai2_array)
+    return_tuple = (cai_array, cai2_array)
+    return return_tuple
 
 
 def csc_compute(codon_dataframe, mrna_hl):
@@ -551,48 +562,49 @@ class Analyze:
               'GAT', 'GAC', 'GAA', 'GAG',
               'GGT', 'GGC', 'GGA', 'GGG']
 
-    def __init__(self, input_path, genecode=1, file_format='fasta',
+    def __init__(self, input_path, genecode=1, file_format='fasta', save=False,
                  quality_control=True, enc=False, ite=False, ite_ref='', X2=False,
                  fop=False, fop_opt='', cbi=False, cbi_opt='', tai=False, tai_gcn='', tai_s='', cai=False, cai_ref='',
                  rscu=False,
                  csc=False, csc_ref='', output=None, prefix=''):
 
-        # enc_flag = False
-
-        # use Seq.IO to read the file and do info preprocess.
-        print('processing input file...')
-        file = SeqIO.parse(input_path, file_format)
-        # 把文件处理的一套单独拿出来写个函数
-        information = info_preprocess(file)
-        Analyze.inputpath = input_path
-
         # read genecode and get related parameters
         genecode_data = GenecodeCompute(genecode=genecode)
         delete_location = genecode_data.delete_location
         sorting = genecode_data.sorting
+        # enc_flag = False
+
+        print('processing input file...')
+        # use Seq.IO to read the file and do info preprocess.
+        information = info_preprocess(input_path, file_format)
+        Analyze.inputpath = input_path
 
         # count the frequency
         print('counting codon frequency...')
-        frequency_array = frequency_count(information[1])
+        # save_dataframe = pd.read_csv('Test_Data\Sars_cov_2.ASM985889v3.cds.fasta.save.csv', index_col=0)
+        # frequency_array = save_dataframe[save_dataframe.columns[2:66]].to_numpy()
+        # print(frequency_array[0], frequency_array1[0])
+        # print(type(frequency_array[0]), type(frequency_array1[0]))
+
+        if file_format not in ['csv', 'save']:
+            frequency_array = frequency_count(information[1])
+        else:
+            frequency_array = information[1]
         frequency_dataframe = pd.DataFrame(frequency_array,
                                            columns=Analyze.codons,
                                            index=np.array(information[0]))
-
         # inner codon control
         inner_stop_codons = np.sum(frequency_array[:, genecode_data.stop_codon_location], axis=1)
         inner_stop_codons = (inner_stop_codons > 1)
-        # todo 注意3的倍数的情况
-
-        # frequency_dataframe.to_csv(folder_name + "/frequency.csv")
-
         # compute indexes one by one
         print('computing indexes for gene...')
         index_dataframe = pd.DataFrame(index=np.array(information[0]))
-        index_dataframe['sequences_length'] = information[2]
+        index_dataframe['sequences_length'] = information[3]
+        index_dataframe['description'] = information[2]
 
         if quality_control:
-            index_dataframe['multi_of_3'] = information[3]
-            index_dataframe['start_codon'] = information[4]
+            index_dataframe['multi_of_3'] = information[4]
+            index_dataframe['start_codon'] = information[5]
             index_dataframe['inner_stopcodon'] = inner_stop_codons
 
         if prefix:
@@ -607,6 +619,16 @@ class Analyze:
             padir = os.path.dirname(input_path)
             out = os.path.join(padir, prefix_name)
             self.output = padir
+
+        if save and file_format not in ['csv', 'save']:
+            print("saving...")
+            save_dataframe = frequency_dataframe
+            save_dataframe.insert(loc=0, column='description', value=information[2])
+            save_dataframe.insert(loc=0, column='sequence_length', value=information[3])
+            save_dataframe.insert(loc=0, column='frequency_check', value=information[4])
+            save_dataframe.insert(loc=0, column='start_codon_check', value=information[5])
+            save_dataframe.insert(loc=len(save_dataframe.columns), column='seq_list', value=information[1])
+            save_dataframe.to_csv(out + ".save.csv", sep=",", index=True)
 
         if enc:
             enc_array = enc_compute(frequency_array, genecode_data)
@@ -697,7 +719,7 @@ class Analyze:
             rscu_dataframe = rscu_compute(processed_array, genecode_data)
             rscu_dataframe.index = frequency_dataframe.index
             self.rscu_result = rscu_dataframe
-            rscu_dataframe.to_csv(out + ".rscu.tsv", sep="\t", index=True)
+            rscu_dataframe.to_csv(out + ".rscu.csv", sep=",", index=True)
 
         if csc:
             try:
@@ -707,14 +729,14 @@ class Analyze:
             # todo 注意文件格式
             csc_dataframe = csc_compute(frequency_dataframe, mrna_hl=np.array(csc_ref.iloc[:, 0].values))
             self.csc_result = csc_dataframe
-            csc_dataframe.to_csv(out + ".csc.tsv", sep="\t", index=True)
+            csc_dataframe.to_csv(out + ".csc.csv", sep=",", index=True)
 
         # output file
         print('writing output files...')
 
         # when the out path existing already, a figure will be accumulated to the end of outpath,
         # which aims to avoid repetition for names if a single prefix correspond to a directory.
-        while os.path.exists(out + ".index.tsv"):
+        while os.path.exists(out + ".index.csv"):
             try:
                 serial = int(out[-1]) + 1
                 out = out[:-1] + str(serial)
@@ -722,7 +744,7 @@ class Analyze:
                 out = out + str(1)
         self.prefix = ntpath.basename(out)
 
-        index_dataframe.to_csv(out + ".index.tsv", sep="\t", index=True)
+        index_dataframe.to_csv(out + ".index.csv", sep=",", index=True)
         # restore original working path
         print('done')
         return
@@ -757,10 +779,13 @@ class Analyze:
 
 
 if __name__ == '__main__':
-    lll = Analyze('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta', genecode=1, enc=True, ite=True,
+    lll = Analyze('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta.save.csv', file_format='csv',
+                  genecode=1, enc=True, ite=True,
                   ite_ref='example/ite_ref.csv', tai=True, tai_gcn='example/tai_gcn.csv', tai_s='example/tai_s.csv',
-                  cai=True,
+                  cai=True, save=True,
                   cai_ref='example/cai_ref.csv', cbi=True, cbi_opt='example/cbi_opt.csv',
                   fop=True, fop_opt='example/fop_opt.csv', X2=True,
                   rscu=True, output='Test_Data')
     # lll.plot(rscu_barplot=True)
+
+# .save.csv', file_format='csv',
