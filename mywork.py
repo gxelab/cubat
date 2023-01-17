@@ -8,10 +8,12 @@ from collections import Counter
 import os
 import ntpath
 import statsmodels.api as sm
-import matplotlib.pyplot as plt
 
 
-class genecode_compute():
+# import matplotlib.pyplot as plt
+
+
+class GenecodeCompute:
     stop_codon_location = None
     number_of_stopcodon = None
     single_codon_location = None
@@ -96,16 +98,13 @@ class genecode_compute():
         mask_ami[1:] = (ami_sort[1:] != ami_sort[:-1])
         codon_familyami__ = np.concatenate(np.nonzero(mask_ami) + ([mask_ami.size],))
         all_amifamilies__ = np.diff(codon_familyami__)
-
-        return (
-            stop_codon_location__, number_of_stopcodon__, single_codon_location__, number_of_single__,
-            delete_location__,
-            number_of_delete__
-            , codon_family24__, all_24families__, number_of_eachfamily__, perm__, codon_familyami__, all_amifamilies__)
+        return (stop_codon_location__, number_of_stopcodon__, single_codon_location__, number_of_single__,
+                delete_location__, number_of_delete__, codon_family24__, all_24families__, number_of_eachfamily__,
+                perm__, codon_familyami__, all_amifamilies__)
 
     def __init__(self, genecode):
-        amino_acid_array = genecode_compute.get_genecode(genecode)
-        data_tuple = genecode_compute.compute_genecode(amino_acid_array)
+        amino_acid_array = GenecodeCompute.get_genecode(genecode)
+        data_tuple = GenecodeCompute.compute_genecode(amino_acid_array)
         self.stop_codon_location = data_tuple[0]
         self.number_of_stopcodon = data_tuple[1]
         self.single_codon_location = data_tuple[2]
@@ -185,24 +184,27 @@ def codon_table_completion(genecode):
 
 def info_preprocess(parse_data):
     data = list(parse_data)
-
     id_list = []
     sequence_length_list = []
     frequency_check = []
     start_codon_check = []
     seq_list = []
+    description = []
 
+    # todo 这可能是主要的限速步骤，有机会看看能不能不用for loop。
     for record in data:
         id_list.append(record.name)
         sequence_length_list.append(len(record.seq))
         start_codon_check.append(str(record.seq[0:3]))
         seq_list.append(str(record.seq))
+        description.append(record.description)
+
         if len(record.seq) % 3 == 0:
             frequency_check.append("True")
         else:
             frequency_check.append("False")
 
-    info_tuple = (id_list, seq_list, sequence_length_list, frequency_check, start_codon_check)
+    info_tuple = (id_list, seq_list, description, sequence_length_list, frequency_check, start_codon_check)
 
     return info_tuple
 
@@ -223,12 +225,12 @@ def count_codon(sequence):
                  'GAC': 0,
                  'GAA': 0, 'GAG': 0, 'GGT': 0, 'GGC': 0, 'GGA': 0, 'GGG': 0}
 
-    # count the frequency of each codon in a sequence, which will be divided into groups of 8 for higher running velocity.
+    # count the frequency of each codon in a sequence,
+    # which will be divided into groups of 8 for higher running velocity.
     counter = Counter(sequence)
     codon_num.update(counter)
 
     codon_array = np.array(list(codon_num.values()))
-
     return codon_array
 
 
@@ -241,7 +243,6 @@ def frequency_count(seq_data):
         seq_str = seq_data[t]
         seq_list = re.findall('.{3}', seq_str)
         result_array[t] = count_codon(seq_list)
-
     return result_array
 
 
@@ -301,27 +302,28 @@ def rscu_compute(processed_array, genecode_data):
 
 def enc_compute(frequency_array, genecode_data):
     # call the genecode database
-    familys = genecode_data.all_24families
+    families = genecode_data.all_24families
     codon_location = genecode_data.codon_family24
     amount_of_eachfamily = genecode_data.number_of_eachfamily
     amount_of_single = genecode_data.number_of_single
     delete_location = genecode_data.delete_location
 
-    # previous work for enc computing, including getting the amount of sequences, processing frequency array and create new array.
+    # previous work for enc computing, including getting the amount of sequences,
+    # processing frequency array and create new array.
     number_of_sequence = frequency_array.shape[0]
     process_arr = np.delete(frequency_array, delete_location, axis=1)
     FcF_array, an_array = np.empty((21, number_of_sequence), dtype=float), np.empty((21, number_of_sequence),
                                                                                     dtype=float)
 
     # do the computing
-    number_of_families = len(familys)
+    number_of_families = len(families)
     for i in range(0, number_of_families):
         F_array = process_arr[:, codon_location[i]:codon_location[i + 1]]
         an = np.sum(F_array, axis=1)
         an_array[i] = an
-        FcF_array[i] = np.sum(np.square(F_array + 1), axis=1) / np.square(an + familys[i])
+        FcF_array[i] = np.sum(np.square(F_array + 1), axis=1) / np.square(an + families[i])
 
-    family2, family3, family4 = (familys == 2), (familys == 3), (familys == 4)
+    family2, family3, family4 = (families == 2), (families == 3), (families == 4)
     family2sum = amount_of_eachfamily[0] * np.sum(an_array[family2], axis=0) / np.sum(
         np.multiply(FcF_array[family2], an_array[family2]), axis=0)
     family3_prevent0 = np.sum(np.multiply(FcF_array[family3], an_array[family3]), axis=0)
@@ -330,7 +332,6 @@ def enc_compute(frequency_array, genecode_data):
     family4sum = amount_of_eachfamily[2] * np.sum(an_array[family4], axis=0) / np.sum(
         np.multiply(FcF_array[family4], an_array[family4]), axis=0)
     enc_array = amount_of_single + family2sum + family3sum + family4sum
-
     return enc_array
 
 
@@ -376,14 +377,15 @@ def chi_squared(processed_array, genecode_data):
 
 
 def cbi_compute(processed_array, genecode_data, opt_codon_cbi):
-    # process optimized codons. remind that opt_codon_fop could be in two format, a 0-1 array judging whether a codon is an
-    # optimized codon or not or an integer array ranged from 0~58 containing the location of optimized codon in the order of
+    # process optimized codons. remind that opt_codon_fop could be in two format,
+    # a 0-1 array judging whether a codon is an optimized codon or not or an integer array ranged
+    # from 0~58 containing the location of optimized codon in the order of
     # amino acid from A to Y("GCA to TAT" less stop codons, W and M.).
 
-    # call the genceode database
+    # call the genecode database
     codon_familyami = genecode_data.codon_familyami
     all_amifamilies = genecode_data.all_amifamilies
-    delect_location = genecode_data.delete_location
+    delete_location = genecode_data.delete_location
     sorting = genecode_data.sorting
 
     # process the parameter
@@ -391,7 +393,7 @@ def cbi_compute(processed_array, genecode_data, opt_codon_cbi):
     if any(opt_array_cbi > 1):
         processed_opt_cbi = opt_codon_cbi
     else:
-        opt_array_cbi = np.delete(opt_array_cbi, delect_location)[sorting]
+        opt_array_cbi = np.delete(opt_array_cbi, delete_location)[sorting]
         processed_opt_cbi = np.nonzero(opt_array_cbi)[0]
 
     # do the computing
@@ -419,8 +421,9 @@ def cbi_compute(processed_array, genecode_data, opt_codon_cbi):
 
 
 def fop_compute(processed_array, opt_codon_fop):
-    # process optimized codons. remind that opt_codon_fop could be in two format, a 0-1 array judging whether a codon is an
-    # optimized codon or not or an integer array ranged from 0~58 containing the location of optimized codon in the order of
+    # process optimized codons. remind that opt_codon_fop could be in two format,
+    # a 0-1 array judging whether a codon is an optimized codon or not or an integer array ranged from
+    # 0~58 containing the location of optimized codon in the order of
     # amino acid from A to Y("GCA to TAT" less stop codons, W and M.).
     opt_array_fop = np.array(opt_codon_fop)
     if any(opt_array_fop > 1):
@@ -475,24 +478,18 @@ def tai_compute(frequency_array, tRNA_GCN, tai_s=None):
 
     num = np.delete(frequency_array, [10, 11, 14, 35], axis=1)
     mut = np.multiply(np.log(Ws), num)
-    sum = np.sum(mut, axis=1)
-    tAI = np.exp(sum / np.sum(num, axis=1))
+    tai_sum = np.sum(mut, axis=1)
+    tAI = np.exp(tai_sum / np.sum(num, axis=1))
     tai_array = tAI
 
     return tai_array
 
 
-def generate_wij_dataframe(codon_dataframe, genecode):
-    wij_dict = {}
-    for codon in codon_dataframe.columns:
-        amino_acid_value = codon_table_completion(genecode)[codon]
-        wij_codons = \
-            [key for key, value in codon_table_completion(genecode).items() if
-             value == amino_acid_value]
-        wij = \
-            codon_dataframe[wij_codons].sum()[codon] / codon_dataframe[wij_codons].sum().sort_values(ascending=False)[0]
-        wij_dict.update({codon: wij})
-    return pd.DataFrame(pd.Series(wij_dict))
+def generate_cai_ref(processed_array):
+    cai_ref = 0
+    for i in processed_array:
+        cai_ref = cai_ref + i
+    return cai_ref
 
 
 def cai_compute(processed_array, reference, genecode_data):
@@ -507,8 +504,8 @@ def cai_compute(processed_array, reference, genecode_data):
         W = one_ami / one_ami.max()
         W_array[codon_familyami[i]:codon_familyami[i + 1]] = W
     all_codon = np.sum(processed_array, axis=1)
-    muilt_array = np.sum(np.multiply(processed_array, np.log(W_array)), axis=1)
-    cai_array = np.exp(muilt_array / all_codon)
+    multi_array = np.sum(np.multiply(processed_array, np.log(W_array)), axis=1)
+    cai_array = np.exp(multi_array / all_codon)
     cai2_array = np.sum(np.multiply(processed_array, W_array), axis=1) / all_codon
 
     return (cai_array, cai2_array)
@@ -523,7 +520,7 @@ def csc_compute(codon_dataframe, mrna_hl):
     return csc_dataframe
 
 
-class analyze():
+class Analyze:
     enc_result = None
     ite_result = None
     X2_result = None
@@ -560,16 +557,17 @@ class analyze():
                  rscu=False,
                  csc=False, csc_ref='', output=None, prefix=''):
 
-        enc_flag = False
+        # enc_flag = False
 
         # use Seq.IO to read the file and do info preprocess.
         print('processing input file...')
         file = SeqIO.parse(input_path, file_format)
+        # 把文件处理的一套单独拿出来写个函数
         information = info_preprocess(file)
-        analyze.inputpath = input_path
+        Analyze.inputpath = input_path
 
         # read genecode and get related parameters
-        genecode_data = genecode_compute(genecode=genecode)
+        genecode_data = GenecodeCompute(genecode=genecode)
         delete_location = genecode_data.delete_location
         sorting = genecode_data.sorting
 
@@ -577,7 +575,7 @@ class analyze():
         print('counting codon frequency...')
         frequency_array = frequency_count(information[1])
         frequency_dataframe = pd.DataFrame(frequency_array,
-                                           columns=analyze.codons,
+                                           columns=Analyze.codons,
                                            index=np.array(information[0]))
 
         # inner codon control
@@ -590,12 +588,25 @@ class analyze():
         # compute indexes one by one
         print('computing indexes for gene...')
         index_dataframe = pd.DataFrame(index=np.array(information[0]))
-        index_dataframe['sequnece_length'] = information[2]
+        index_dataframe['sequences_length'] = information[2]
 
         if quality_control:
-            index_dataframe['mult_of_3'] = information[3]
+            index_dataframe['multi_of_3'] = information[3]
             index_dataframe['start_codon'] = information[4]
             index_dataframe['inner_stopcodon'] = inner_stop_codons
+
+        if prefix:
+            prefix_name = prefix
+        else:
+            prefix_name = ntpath.basename(input_path)
+
+        if output:
+            out = os.path.join(output, prefix_name)
+            self.output = output
+        else:
+            padir = os.path.dirname(input_path)
+            out = os.path.join(padir, prefix_name)
+            self.output = padir
 
         if enc:
             enc_array = enc_compute(frequency_array, genecode_data)
@@ -604,7 +615,7 @@ class analyze():
 
         if ite:
             try:
-                ite_ref = pd.read_csv(ite_ref, index_col=0, header=0).loc[analyze.codons]
+                ite_ref = pd.read_csv(ite_ref, index_col=0, header=0).loc[Analyze.codons]
             except:
                 raise FileNotFoundError('the reference for ite is unreachable.')
             # todo 自己寻找reference。
@@ -617,7 +628,7 @@ class analyze():
 
         if tai:
             try:
-                tai_gcn = pd.read_csv(tai_gcn, index_col=0, header=0).loc[analyze.codons]
+                tai_gcn = pd.read_csv(tai_gcn, index_col=0, header=0).loc[Analyze.codons]
             except:
                 # todo 注意s的修改
                 raise FileNotFoundError('the gene copy number for tai is unreachable.')
@@ -640,7 +651,7 @@ class analyze():
 
         if fop:
             try:
-                fop_opt = pd.read_csv(fop_opt, index_col=0, header=0).loc[analyze.codons]
+                fop_opt = pd.read_csv(fop_opt, index_col=0, header=0).loc[Analyze.codons]
             except:
                 raise FileNotFoundError('the reference for fop is unreachable.')
             # todo 自己寻找reference。
@@ -651,7 +662,7 @@ class analyze():
 
         if cbi:
             try:
-                cbi_opt = pd.read_csv(cbi_opt, index_col=0, header=0).loc[analyze.codons]
+                cbi_opt = pd.read_csv(cbi_opt, index_col=0, header=0).loc[Analyze.codons]
             except:
                 raise FileNotFoundError('the reference for cbi is unreachable.')
             # todo 自己寻找reference。注意排序的问题。两次排序，先排成ACGT，再按照氨基酸排。
@@ -663,11 +674,13 @@ class analyze():
 
         if cai:
             try:
-                cai_ref = pd.read_csv(cai_ref, index_col=0, header=0).loc[analyze.codons]
+                if ".csv" in cai_ref:
+                    cai_ref = pd.read_csv(cai_ref, index_col=0, header=0).loc[Analyze.codons]
+                # else:
+                #     cai_ref = generate_cai_ref()
             except:
                 raise FileNotFoundError('the reference for cai is unreachable.')
 
-            # todo 注意dataframe的横竖。
             cai_array, cai2_array = cai_compute(processed_array, genecode_data=genecode_data,
                                                 reference=np.array(cai_ref.iloc[:, 0].values))
             # reference_dataframe=pd.read_excel('Homo_sapiens.xlsx')
@@ -684,6 +697,7 @@ class analyze():
             rscu_dataframe = rscu_compute(processed_array, genecode_data)
             rscu_dataframe.index = frequency_dataframe.index
             self.rscu_result = rscu_dataframe
+            rscu_dataframe.to_csv(out + ".rscu.tsv", sep="\t", index=True)
 
         if csc:
             try:
@@ -693,22 +707,10 @@ class analyze():
             # todo 注意文件格式
             csc_dataframe = csc_compute(frequency_dataframe, mrna_hl=np.array(csc_ref.iloc[:, 0].values))
             self.csc_result = csc_dataframe
-            # print(csc_dataframe)
+            csc_dataframe.to_csv(out + ".csc.tsv", sep="\t", index=True)
 
         # output file
         print('writing output files...')
-        if prefix:
-            prefix_name = prefix
-        else:
-            prefix_name = ntpath.basename(input_path)
-
-        if output:
-            out = os.path.join(output, prefix_name)
-            self.output = output
-        else:
-            padir = os.path.dirname(input_path)
-            out = os.path.join(padir, prefix_name)
-            self.output = padir
 
         # when the out path existing already, a figure will be accumulated to the end of outpath,
         # which aims to avoid repetition for names if a single prefix correspond to a directory.
@@ -721,48 +723,44 @@ class analyze():
         self.prefix = ntpath.basename(out)
 
         index_dataframe.to_csv(out + ".index.tsv", sep="\t", index=True)
-        if rscu:
-            rscu_dataframe.to_csv(out + ".rscu.tsv", sep="\t", index=True)
-        if csc:
-            csc_dataframe.to_csv(out + ".csc.tsv", sep="\t", index=True)
-
         # restore original working path
         print('done')
         return
 
-    def plot(self, rscu_barplot=False, output='', prefix=''):
-        print('start plotting...')
-        # decide output path and prefix
-        if prefix:
-            try:
-                n = int(self.prefix[-1])
-                prefix_name = prefix + str(n)
-            except:
-                prefix_name = prefix
-        else:
-            prefix_name = self.prefix
-
-        if output:
-            out = os.path.join(output, prefix_name)
-        else:
-            out = os.path.join(self.output, prefix_name)
+    # def plot(self, rscu_barplot=False, output='', prefix=''):
+    #     print('start plotting...')
+    #     # decide output path and prefix
+    #     if prefix:
+    #         try:
+    #             n = int(self.prefix[-1])
+    #             prefix_name = prefix + str(n)
+    #         except:
+    #             prefix_name = prefix
+    #     else:
+    #         prefix_name = self.prefix
+    #
+    #     if output:
+    #         out = os.path.join(output, prefix_name)
+    #     else:
+    #         out = os.path.join(self.output, prefix_name)
 
         # do the plotting
-        if rscu_barplot:
-            if type(self.rscu_result) != pd.DataFrame:
-                raise ValueError('rscu was not computed.')
-            plt.bar(range(len(analyze.codons)), self.rscu_result.iloc[0], tick_label=analyze.codons)
-            plt.title('''rscu_barplot''', fontsize=20)
-            plt.savefig(out + 'rscu.jpg', dpi=500, bbox_inches='tight')
+        # if rscu_barplot:
+        #     if type(self.rscu_result) != pd.DataFrame:
+        #         raise ValueError('rscu was not computed.')
+        #     plt.bar(range(len(analyze.codons)), self.rscu_result.iloc[0], tick_label=analyze.codons)
+        #     plt.title('''rscu_barplot''', fontsize=20)
+        #     plt.savefig(out + 'rscu.jpg', dpi=500, bbox_inches='tight')
+        #
+        # print('done')
+        # return
 
-        print('done')
-        return
 
 if __name__ == '__main__':
-    lll = analyze('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta', genecode=1,enc=True,ite=True,ite_ref=
-    'example/ite_ref.csv',tai=True,tai_gcn='example/tai_gcn.csv',tai_s='example/tai_s.csv',cai=True,cai_ref='example/cai_ref.csv',cbi=True,cbi_opt=
-    'example/cbi_opt.csv',fop=True,fop_opt='example/fop_opt.csv',X2=True,
+    lll = Analyze('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta', genecode=1, enc=True, ite=True,
+                  ite_ref='example/ite_ref.csv', tai=True, tai_gcn='example/tai_gcn.csv', tai_s='example/tai_s.csv',
+                  cai=True,
+                  cai_ref='example/cai_ref.csv', cbi=True, cbi_opt='example/cbi_opt.csv',
+                  fop=True, fop_opt='example/fop_opt.csv', X2=True,
                   rscu=True, output='Test_Data')
-    lll.plot(rscu_barplot=True)
-
-    #######
+    # lll.plot(rscu_barplot=True)
