@@ -766,26 +766,28 @@ class Analyze:
     #     else:
     #         out = os.path.join(self.output, prefix_name)
 
-        # do the plotting
-        # if rscu_barplot:
-        #     if type(self.rscu_result) != pd.DataFrame:
-        #         raise ValueError('rscu was not computed.')
-        #     plt.bar(range(len(analyze.codons)), self.rscu_result.iloc[0], tick_label=analyze.codons)
-        #     plt.title('''rscu_barplot''', fontsize=20)
-        #     plt.savefig(out + 'rscu.jpg', dpi=500, bbox_inches='tight')
-        #
-        # print('done')
-        # return
+    # do the plotting
+    # if rscu_barplot:
+    #     if type(self.rscu_result) != pd.DataFrame:
+    #         raise ValueError('rscu was not computed.')
+    #     plt.bar(range(len(analyze.codons)), self.rscu_result.iloc[0], tick_label=analyze.codons)
+    #     plt.title('''rscu_barplot''', fontsize=20)
+    #     plt.savefig(out + 'rscu.jpg', dpi=500, bbox_inches='tight')
+    #
+    # print('done')
+    # return
 
+
+# if FAS type fasta.
 
 if __name__ == '__main__':
-    lll = Analyze('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta.save.csv', file_format='csv',
-                  genecode=1, enc=True, ite=True,
-                  ite_ref='example/ite_ref.csv', tai=True, tai_gcn='example/tai_gcn.csv', tai_s='example/tai_s.csv',
-                  cai=True, save=True,
-                  cai_ref='example/cai_ref.csv', cbi=True, cbi_opt='example/cbi_opt.csv',
-                  fop=True, fop_opt='example/fop_opt.csv', X2=True,
-                  rscu=True, output='Test_Data')
+    test = Analyze('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta.save.csv', file_format='csv',
+                   genecode=1, enc=True, ite=True,
+                   ite_ref='example/ite_ref.csv', tai=True, tai_gcn='example/tai_gcn.csv', tai_s='example/tai_s.csv',
+                   cai=True, save=True,
+                   cai_ref='example/cai_ref.csv', cbi=True, cbi_opt='example/cbi_opt.csv',
+                   fop=True, fop_opt='example/fop_opt.csv', X2=True,
+                   rscu=True, output='Test_Data')
     # lll.plot(rscu_barplot=True)
 
 # .save.csv', file_format='csv',

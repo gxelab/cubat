@@ -1,0 +1,6 @@
+numpy~=1.21.1
+pandas~=1.3.0
+statsmodels~=0.13.2
+click~=8.0.3
+setuptools~=66.0.0
+Bio
