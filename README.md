@@ -15,7 +15,7 @@ pip install cubat
 For update:
 
 ```
-pip install biopython --upgrade
+pip install cubat --upgrade
 ```
 
 You can easily calculate multiple codon bias indexes with CUBAT.​
