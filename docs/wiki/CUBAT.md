@@ -29,8 +29,19 @@ For update:
 pip install cubat --upgrade
 ```
 
+### Usage
 You can easily calculate multiple codon bias indexes with CUBAT.​
 
+For example: You want calculate CAI(with reference of human), ENC and RSCU of SARS-COV-2.
+All you need to do is provide a fasta file of SARS-COV-2 and human reference for cai(You can use the built-in data).
+
+Run this:
+```bash
+cubat analyze --cr example/cai_ref.csv  -erc  Test_Data/Sars_cov_2.fasta
+```
+You will get two csv sheets with your desired results there.
+
+### And more...
 The following is a comparison with other software that can calculate CUB indexes.
 
 |                                       | CUBAT | codonW | DAMBE | EMBOSS |
