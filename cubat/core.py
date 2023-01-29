@@ -781,7 +781,7 @@ class Analyze:
 # if FAS type fasta.
 
 if __name__ == '__main__':
-    test = Analyze('Test_Data/Sars_cov_2.ASM985889v3.cds.fasta', file_format='fasta',
+    test = Analyze('Test_Data/Sars_cov_2.fasta', file_format='fasta',
                    genecode=1, enc=True, ite=True,
                    ite_ref='example/ite_ref.csv', tai=True, tai_gcn='example/tai_gcn.csv', tai_s='example/tai_s.csv',
                    cai=True, save=True,

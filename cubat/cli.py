@@ -13,17 +13,17 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.pass_context
 @optgroup.group('general options')
 @optgroup.option('-g', '--genecode', 'genecode', metavar='<int>', default=1, type=click.INT,
-                 show_default=True, help='genetic code of sequences for analysis and plotting')
+                 show_default=True, help='This option is use for change codon table.')
 def cli(ctx, genecode):
     ctx.ensure_object(dict)
     ctx.obj['code'] = genecode
     pass
 
 
-@cli.command('analyze')
+@cli.command('analyze',help=r'Calculate indexes.Try cubat analyze -h for more...')
 @click.pass_context
 @click.argument('input', type=click.Path(exists=True), metavar='INPUT')
-@optgroup.group('gene analyze', help='computing indexes for gene.')
+@optgroup.group('CUB analyze', help='computing indexes for gene.')
 @optgroup.option('-e', '--enc', 'enc', is_flag=True, help=r'a flag option to compute ite.')
 @optgroup.option('-x', '--chi^2', 'chi2', is_flag=True, help=r'a flag option to compute chi-squared.')
 @optgroup.option('-c', '--cai', 'cai', is_flag=True, help=r'a flag option to compute cai.')
@@ -48,17 +48,21 @@ def cli(ctx, genecode):
                  metavar='<constraint>',
                  help=r'selective constraint for tai computing, refering to cubat\example\tai_s.csv.'
                       r'if none, the default value for eucaryon will be used')
-@optgroup.group('codon analyze', help='computing indexes for codon.')
+
+
+# @optgroup.group('codon analyze', help='computing indexes for codon.')
 @optgroup.option('-r', '--rscu', 'rscu', is_flag=True, help=r'a flag option to compute rscu.')
 @optgroup.option('-s', '--csc', 'csc', is_flag=True, help=r'a flag option to compute csc.')
 @optgroup.option('--ml', '--mrnahl', 'mrnahl', type=click.Path(),
                  metavar='<mrna half-life>',
                  help=r'half-life of mrna for csc computing, refering to cubat\example\csc_mranhl.csv.')
-@optgroup.group('output')
+
+@optgroup.group('output and saving')
 @optgroup.option('-o', '--output', 'output', help=r'output path.')
 @optgroup.option('-p', '--prefix', 'prefix', default='', help=r'prefix for output files.')
+@optgroup.option('-a', '--save', is_flag=True, help=r'a flag option of saving.')
 def cubat_analyze(ctx, enc, chi2, cai, cairef, fop, fopopt, cbi, cbiopt, ite, iteref, tai, taigcn, tais, rscu, csc,
-                  mrnahl, output, prefix, input):
+                  mrnahl, output, save, prefix, input):
     # process input file. get format.
     ctx.obj['input'] = input
     dire = False
@@ -94,7 +98,7 @@ def cubat_analyze(ctx, enc, chi2, cai, cairef, fop, fopopt, cbi, cbiopt, ite, it
         result = Analyze(file_list[amount], file_format=format_list[amount], genecode=genecode, enc=enc, cai=cai,
                          cai_ref=cairef, X2=chi2, fop=fop, fop_opt=fopopt,
                          cbi=cbi, cbi_opt=cbiopt, tai_s=tais,
-                         tai=tai, tai_gcn=taigcn, rscu=rscu, csc=csc, csc_ref=mrnahl, output=output, prefix=prefix)
+                         tai=tai, tai_gcn=taigcn, rscu=rscu, csc=csc, csc_ref=mrnahl, output=output, save=save, prefix=prefix)
         ctx.obj[file_list[amount]] = result
     #todo 生成器
 
@@ -102,7 +106,7 @@ def cubat_analyze(ctx, enc, chi2, cai, cairef, fop, fopopt, cbi, cbiopt, ite, it
     pass
 
 
-@cli.command('plot')
+@cli.command('plot', help=r'Try cubat plot -h for more...')
 @click.pass_context
 @click.argument('input', type=click.Path(), metavar='INPUT', default='')
 @optgroup.group('plots')
