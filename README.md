@@ -1,39 +1,38 @@
- ![](/docs/mstile-150x150.png)
 
-### Introduction
+# CUBAT <img src='docs/mstile-150x150.png' align="right" height="139" />
 
-CUBAT is a python program to help analyze codon usage bias(CUB). You can run it as a script or the command line.
+Codon Usage Bias Analysis Toolkit (CUBAT) is a powerful python package for codon usage bias (CUB) analysis. CUBAT can be imported as a module for custom analyses and has a command line interface as well.
 
 ### Installation
 
-For install:
+You can install `cubat` with `pip` from command line:
 
-```
+```bash
 pip install cubat
 ```
 
-For update:
+To update, run the following command:
 
-```
+```bash
 pip install cubat --upgrade
 ```
 
-You can easily calculate multiple codon bias indexes with CUBAT.​
+### Main features
+CUBAT can calculate various indices related to codon usage. Here is a summary of indices supported by CUBAT in comparison with other popular software.
 
-The following is a comparison with other software that can calculate CUB indexes.
-
-|                                       | CUBAT | codonW | DAMBE | EMBOSS |
-| ------------------------------------- | ----- | ------ | ----- | ------ |
-| RSCU(relative synonymous codon usage) | √     | √      | √     |        |
-| Nc:(effective number of codons)       |       | √      |       | √      |
-| Nc(effective number of codons,SYX13)  | √     |        | √     |        |
-| CAI(codon adaptation index)           | √     | √      | √     | √      |
-| CAI2(Xuhua Xia,2007)                  | √     |        | √     |        |
-| CBI(codon bias index)                 | √     | √      | √     |        |
-| Fop(frequency of optimal codons)      | √     | √      | √     |        |
-| TAI(tRNA adaptation index)            | √     |        |       |        |
-| CSC(codon stabilization coefficient)  | √     |        |       |        |
-| the scaled χ2                         | √     |        |       |        |
-| Amino acid usage                      | √     | √      | √     |        |
-| Codon table replaceability            | √     |        | √     |        |
-| cross-platform                        | √     |        | √     | √      |
+|  Index                                 | CUBAT | codonW | DAMBE | EMBOSS |
+| -------------------------------------  | ----- | ------ | ----- | ------ |
+| RSCU (relative synonymous codon usage) | √     | √      | √     |        |
+| Nc (effective number of codons)        |       | √      |       | √      |
+| Nc (effective number of codons,SYX13)  | √     |        | √     |        |
+| CAI (codon adaptation index)           | √     | √      | √     | √      |
+| CAI2 (Xuhua Xia,2007)                  | √     |        | √     |        |
+| CBI (codon bias index)                 | √     | √      | √     |        |
+| Fop (frequency of optimal codons)      | √     | √      | √     |        |
+| TAI (tRNA adaptation index)            | √     |        |       |        |
+| CSC (codon stabilization coefficient)  | √     |        |       |        |
+| Scaled χ<sup>2<sup>                    | √     |        |       |        |
+| **Other Features**                     |
+| Amino acid usage                       | √     | √      | √     |        |
+| Custom genetic code                    | √     |        | √     |        |
+| Cross-platform                         | √     |        | √     | √      |
