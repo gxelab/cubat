@@ -576,6 +576,8 @@ class Analyze:
 
         print('processing input file...')
         # use Seq.IO to read the file and do info preprocess.
+        if file_format == 'fna':
+            file_format = 'fasta'
         information = info_preprocess(input_path, file_format)
         Analyze.inputpath = input_path
 
