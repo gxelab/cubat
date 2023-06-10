@@ -12,12 +12,12 @@ whitelist:
 # Setup
 title: CUBAT
 tagline: Codon Usage Bias Analysis Toolkit
-url: https://https://gxelab.github.io/CUBAT/
+url: https://https://gxelab.github.io/cubat/
 baseurl:
 
 author:
   name: GXElab Contributors
-  url: https://gxelab.github.io/CUBAT/
+  url: https://gxelab.github.io/cubat/
 
 # Custom variables for Hyde theme
 # version: "1.2"
