@@ -1,6 +1,6 @@
 ---
 title: CUB intro
-permalink: /CUBAT/CUB_intro
+permalink: /cubat/CUB_intro
 layout: page
 ---
 

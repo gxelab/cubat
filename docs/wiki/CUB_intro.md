@@ -42,13 +42,13 @@ There are many theories explaining the origin of codons. In general, codons unde
 
 ### Codon bias indices
 
-To study CUB, many scientists have proposed indexes for evaluating it. You can easily calculate the following indexes in CUBAT.
+To study CUB, many scientists have proposed indexes for evaluating it. You can easily calculate the following indexes in cubat.
 
-- [RSCU(relative synonymous codon usage)](https://gxelab.github.io/CUBAT/indexes/RSCU)
-- [ENC(effective number of codons, also called the Nc)](https://gxelab.github.io/CUBAT/indexes/ENC)
-- [CAI(codon adaptation index)](https://gxelab.github.io/CUBAT/indexes/CAI)
-- [CBI(codon bias index)](https://gxelab.github.io/CUBAT/indexes/CBI)
-- [Fop (fraction of optimal codons)](https://gxelab.github.io/CUBAT/indexes/FOP)
-- [tAI (tRNA adaption index)](https://gxelab.github.io/CUBAT/indexes/TAI)
-- [CSC(codon stabilization coefficient)](https://gxelab.github.io/CUBAT/indexes/CSC)
-- [the scaled χ2](https://gxelab.github.io/CUBAT/indexes/X2)
+- [RSCU(relative synonymous codon usage)](https://gxelab.github.io/cubat/indexes/RSCU)
+- [ENC(effective number of codons, also called the Nc)](https://gxelab.github.io/cubat/indexes/ENC)
+- [CAI(codon adaptation index)](https://gxelab.github.io/cubat/indexes/CAI)
+- [CBI(codon bias index)](https://gxelab.github.io/cubat/indexes/CBI)
+- [Fop (fraction of optimal codons)](https://gxelab.github.io/cubat/indexes/FOP)
+- [tAI (tRNA adaption index)](https://gxelab.github.io/cubat/indexes/TAI)
+- [CSC(codon stabilization coefficient)](https://gxelab.github.io/cubat/indexes/CSC)
+- [the scaled χ2](https://gxelab.github.io/cubat/indexes/X2)
