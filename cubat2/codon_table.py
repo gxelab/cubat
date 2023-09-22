@@ -1,7 +1,7 @@
 from Bio.Data import CodonTable
 
 
-def get_codon_table_by_index(index):
+def get_codon_table_by_index(index=1):
     """
     根据密码子表的序号获取密码子表以及每个密码子表的起始密码子和终止密码子。
 
@@ -26,13 +26,13 @@ def get_codon_table_by_index(index):
     # # 获取起始密码子和终止密码子
     # start_codon = codon_table.start_codons
     # stop_codons = codon_table.stop_codons
-
+    # TODO 自定义密码子表
     return codon_table
 
 
-'''
+
 # 用法示例：
-index = 1  # 例如，选择标准密码子表
-codon_table = get_codon_table_by_index(index)
-print(codon_table)
-'''
+if __name__ == "__main__":
+    index = 1  # 例如，选择标准密码子表
+    codon_table = get_codon_table_by_index(index)
+    print(codon_table)
