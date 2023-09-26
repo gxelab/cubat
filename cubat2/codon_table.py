@@ -30,6 +30,32 @@ def get_codon_table_by_index(index=1):
     return codon_table
 
 
+def codon_table_completion(index=1):
+    codon_table = CodonTable.unambiguous_dna_by_id[index].forward_table
+    codons = ["TTT", "TTC", "TTA", "TTG",
+              "TCT", "TCC", "TCA", "TCG",
+              "TAT", "TAC", "TAA", "TAG",
+              "TGT", "TGC", "TGA", "TGG",
+              "CTT", "CTC", "CTA", "CTG",
+              "CCT", "CCC", "CCA", "CCG",
+              "CAT", "CAC", "CAA", "CAG",
+              "CGT", "CGC", "CGA", "CGG",
+              "ATT", "ATC", "ATA", "ATG",
+              "ACT", "ACC", "ACA", "ACG",
+              "AAT", "AAC", "AAA", "AAG",
+              "AGT", "AGC", "AGA", "AGG",
+              "GTT", "GTC", "GTA", "GTG",
+              "GCT", "GCC", "GCA", "GCG",
+              "GAT", "GAC", "GAA", "GAG",
+              "GGT", "GGC", "GGA", "GGG"]
+    
+    complete_codon_table = codon_table.copy()
+    for codon in codons:
+        if codon not in complete_codon_table:
+            complete_codon_table[codon] = "*"
+
+    return complete_codon_table
+
 
 # 用法示例：
 if __name__ == "__main__":
