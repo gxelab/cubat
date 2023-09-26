@@ -1,9 +1,7 @@
 import time
 import numpy as np
 import pandas as pd
-from Bio.SeqUtils import seq1
-from Bio.Data import CodonTable
-from collections import Counter
+from collections import defaultdict
 from sequences_loader import sequences_to_codonframe
 from codon_table import get_codon_table_by_index, codon_table_completion
 
@@ -84,7 +82,7 @@ def calculate_relative_adapt(file_path, codon_table_index=1):
 
 def relative_adapt_loader(csv_file, codon_table_index=1):
     """
-    根据输入的 CSV 文件内容判断是密码子数量数据还是相对适应度数据，然后计算相对适应度并返回结果。
+    根据输入的 CSV 文件内容判断是密码子数量数据还是相对适应度数据,然后计算相对适应度并返回结果。
 
     参数:
     - csv_file (str): 输入的 CSV 文件路径。
@@ -136,10 +134,10 @@ def calculate_CAI(sequences, relAdapt, codon_table_index=1):
         relAdapt = relAdapt
     elif isinstance(relAdapt, str):
         if relAdapt.endswith('.csv'):
-            # 如果输入是CSV文件路径，则调用 relative_adapt_loader 函数
+            # 如果输入是CSV文件路径,则调用 relative_adapt_loader 函数
             relAdapt = relative_adapt_loader(relAdapt, codon_table_index=codon_table_index)
         else:
-            # 如果输入是文件路径但不是CSV文件，则调用 calculate_relative_adapt 函数
+            # 如果输入是文件路径但不是CSV文件,则调用 calculate_relative_adapt 函数
             relAdapt = calculate_relative_adapt(relAdapt, codon_table_index=codon_table_index)
 
     # 获取选择的密码子表
@@ -167,6 +165,76 @@ def calculate_CAI(sequences, relAdapt, codon_table_index=1):
 
 
 
+def calculate_enc(codonframe, codon_table_index=1):
+    """
+    计算基因的enc值。
+
+    参数:
+    - codonframe (pd.DataFrame): 包含密码子频率信息的DataFrame,由sequences_to_codonframe函数生成。
+    - codon_table_index (int): 选择的密码子表的序号,默认为1。
+
+    返回:
+    - enc (pd.DataFrame): 包含每个基因的enc值的DataFrame,以"enc"列命名。
+    """
+
+    # 获取选择的密码子表
+    codon_table = get_codon_table_by_index(codon_table_index)
+
+    # 获取同义密码子的列表
+    codon_list = list(codon_table.forward_table.keys())
+
+    # 创建一个字典用于存储每个同义密码子类别的信息
+    subfam_dict = defaultdict(list)
+    for codon in codon_list:
+        subfam = codon_table.forward_table[codon]
+        subfam_dict[subfam].append(codon)
+
+
+    # 计算每个同义密码子类别内的 F_CF 和 n_j
+    fcf_dict = {}
+    nj_dict = {}
+    for subfam, codons in subfam_dict.items():
+        subfam_frame = codonframe[codons]
+        n = subfam_frame.sum(axis=1)
+        mx = subfam_frame.max(axis=1)
+        ncol_mx = subfam_frame.shape[1]
+        fcf = (mx + 1) / (n + ncol_mx)
+        nj = mx + 1
+        fcf_dict[subfam] = fcf
+        nj_dict[subfam] = nj
+
+    # 计算 enc
+    enc = pd.DataFrame(index=codonframe.index, columns=["enc"], dtype=float)
+    enc.fillna(0, inplace=True)
+
+    ss = len(subfam_dict)  # 同义密码子类别的数量
+
+    N_single = 1 / ss  # 只有一个同义密码子类别的基因的贡献
+
+    if ss >= 2:
+        N_double = 2 * (ss - 1) / (ss * (ss - 2))  # 有两个同义密码子类别的基因的贡献
+    else:
+        N_double = 0
+
+    if ss >= 3:
+        N_triple = 6 / (ss * (ss - 1) * (ss - 2))  # 有三个同义密码子类别的基因的贡献
+    else:
+        N_triple = 0
+
+    if ss >= 4:
+        N_quad = 24 / (ss * (ss - 1) * (ss - 2) * (ss - 3))  # 有四个同义密码子类别的基因的贡献
+    else:
+        N_quad = 0
+
+    for gene_id in codonframe.index:
+        fcf_gene = [fcf_dict[subfam][gene_id] for subfam in subfam_dict.keys()]
+        nj_gene = [nj_dict[subfam][gene_id] for subfam in subfam_dict.keys()]
+
+        enc.loc[gene_id, "enc"] = N_single + N_double * sum(fcf_gene) + N_triple * sum(nj_gene) + N_quad * sum(nj_gene)
+
+    return enc
+
+
 # 示例用法：
 if __name__ == "__main__":
     start_time = time.time()
@@ -191,11 +259,17 @@ if __name__ == "__main__":
         print(relAdapt)
     
     # CAI测试代码
-    if True:
+    if False:
         relAdapt = calculate_relative_adapt(file_path, codon_table_index=1)
         cai = calculate_CAI(codonframe, relAdapt)
         print(cai)
+    
+    # ENC测试代码
+    if True:
+        enc = calculate_enc(codonframe)
+        print(enc)
+
 
     end_time = time.time()
     execution_time = end_time - start_time
-    print(f"函数执行时间：{execution_time}秒")
+    print(f"执行时间：{execution_time}秒")
