@@ -1,3 +1,4 @@
+import pandas as pd
 from Bio.Data import CodonTable
 
 
@@ -57,8 +58,37 @@ def codon_table_completion(index=1):
     return complete_codon_table
 
 
-# 用法示例：
+def codon_table_subfamily(index= 1):
+    """
+    根据密码子表编号获取密码子表的子家族信息。
+
+    参数:
+    - index (str): 密码子表的编号，默认为 '1'。
+
+    返回:
+    - codon_table_subfamily (pd.DataFrame): 包含密码子子家族信息的DataFrame, 包括 aa_code, amino_acid, codon, 和 subfam 列。
+    """
+    codon_table = CodonTable.unambiguous_dna_by_id[int(index)]
+    codon_table_dict = {
+        'codon': [],
+        'amino_acid': [],
+        'subfamily': []
+    }
+
+    for codon, amino_acid in codon_table.forward_table.items():
+        aa_code = CodonTable.ambiguous_dna_by_id[int(index)].forward_table[codon]
+        subfamily = f"{amino_acid}_{codon[:2]}"
+        codon_table_dict['codon'].append(codon)
+        codon_table_dict['amino_acid'].append(amino_acid)
+        codon_table_dict['subfamily'].append(subfamily)
+
+    codon_table_subfamily = pd.DataFrame(codon_table_dict)
+    return codon_table_subfamily
+
+
+# 测试代码：
 if __name__ == "__main__":
     index = 1  # 例如，选择标准密码子表
-    codon_table = get_codon_table_by_index(index)
+    codon_table = codon_table_subfamily(index)
     print(codon_table)
+    

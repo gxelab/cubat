@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from sequences_loader import sequences_to_codonframe
-from codon_table import get_codon_table_by_index, codon_table_completion
+from codon_table import get_codon_table_by_index, codon_table_completion, codon_table_subfamily
 
 def calculate_rscu(codonframe, codon_table_index=1):
     """
@@ -164,74 +164,63 @@ def calculate_CAI(sequences, relAdapt, codon_table_index=1):
     return cai
 
 
-
 def calculate_enc(codonframe, codon_table_index=1):
     """
-    计算基因的enc值。
+    计算基因的ENC(Effective Number of Codons)值。
 
     参数:
-    - codonframe (pd.DataFrame): 包含密码子频率信息的DataFrame,由sequences_to_codonframe函数生成。
-    - codon_table_index (int): 选择的密码子表的序号,默认为1。
+    - codonframe (pd.DataFrame): 包含每个序列的ID以及每个密码子的数量的DataFrame。
+    - codon_table_index (int): 选择的密码子表的序号, 默认为1。
 
     返回:
-    - enc (pd.DataFrame): 包含每个基因的enc值的DataFrame,以"enc"列命名。
+    - enc (pd.Series): 包含每个基因的ENC值的Series。
     """
-
+    
     # 获取选择的密码子表
     codon_table = get_codon_table_by_index(codon_table_index)
+    subfamily_table = codon_table_subfamily(codon_table_index)
+    
+    # 剔除终止密码子列
+    stop_codons = codon_table.stop_codons
+    codonframe = codonframe.drop(columns=stop_codons, errors='ignore')
 
-    # 获取同义密码子的列表
-    codon_list = list(codon_table.forward_table.keys())
+    # 计算同义密码子的亚家族（subfam）
+    subfamily_dict = {}
+    for codon, subfamily in zip(subfamily_table['codon'], subfamily_table['subfamily']):
+        subfamily_dict[codon] = subfamily
+    
+    # 初始化 enc 值的字典
+    enc_values = {}
 
-    # 创建一个字典用于存储每个同义密码子类别的信息
-    subfam_dict = defaultdict(list)
-    for codon in codon_list:
-        subfam = codon_table.forward_table[codon]
-        subfam_dict[subfam].append(codon)
+   # 根据亚家族分组密码子
+    codon_list = {}
+    for index, row in subfamily_table.iterrows():
+        subfamily = row['subfamily']
+        codon = row['codon']
+        if subfamily not in codon_list:
+            codon_list[subfamily] = []
+        codon_list[subfamily].append(codon)
 
 
-    # 计算每个同义密码子类别内的 F_CF 和 n_j
-    fcf_dict = {}
-    nj_dict = {}
-    for subfam, codons in subfam_dict.items():
-        subfam_frame = codonframe[codons]
-        n = subfam_frame.sum(axis=1)
-        mx = subfam_frame.max(axis=1)
-        ncol_mx = subfam_frame.shape[1]
-        fcf = (mx + 1) / (n + ncol_mx)
-        nj = mx + 1
-        fcf_dict[subfam] = fcf
-        nj_dict[subfam] = nj
+    # 计算 ENC
+    f_cf = pd.DataFrame(index=codonframe.index)
+    n_cf = pd.DataFrame(index=codonframe.index)
 
-    # 计算 enc
-    enc = pd.DataFrame(index=codonframe.index, columns=["enc"], dtype=float)
-    enc.fillna(0, inplace=True)
+    for subfamily, codons in codon_list.items():
+        mx = codonframe[codons].values
+        n = np.sum(mx, axis=1)
+        p = (mx + 1) / (n.reshape(-1, 1) + len(codons))
+        f_cf[subfamily] = np.sum(np.power(p, 2), axis=1)
+        n_cf[subfamily] = n + len(codons)
 
-    ss = len(subfam_dict)  # 同义密码子类别的数量
 
-    N_single = 1 / ss  # 只有一个同义密码子类别的基因的贡献
-
-    if ss >= 2:
-        N_double = 2 * (ss - 1) / (ss * (ss - 2))  # 有两个同义密码子类别的基因的贡献
-    else:
-        N_double = 0
-
-    if ss >= 3:
-        N_triple = 6 / (ss * (ss - 1) * (ss - 2))  # 有三个同义密码子类别的基因的贡献
-    else:
-        N_triple = 0
-
-    if ss >= 4:
-        N_quad = 24 / (ss * (ss - 1) * (ss - 2) * (ss - 3))  # 有四个同义密码子类别的基因的贡献
-    else:
-        N_quad = 0
-
-    for gene_id in codonframe.index:
-        fcf_gene = [fcf_dict[subfam][gene_id] for subfam in subfam_dict.keys()]
-        nj_gene = [nj_dict[subfam][gene_id] for subfam in subfam_dict.keys()]
-
-        enc.loc[gene_id, "enc"] = N_single + N_double * sum(fcf_gene) + N_triple * sum(nj_gene) + N_quad * sum(nj_gene)
-
+    ss = [len(codons) for codons in codon_list.values()]
+    N_single = np.sum(np.array(ss) == 1)
+    N_double = np.sum(np.array(ss) == 2) * np.sum(n_cf.iloc[:, np.array(ss) == 2], axis=1) / np.sum(n_cf.iloc[:, np.array(ss) == 2] * f_cf.iloc[:, np.array(ss) == 2], axis=1)
+    N_triple = np.sum(np.array(ss) == 3) * np.sum(n_cf.iloc[:, np.array(ss) == 3], axis=1) / np.sum(n_cf.iloc[:, np.array(ss) == 3] * f_cf.iloc[:, np.array(ss) == 3], axis=1)
+    N_quad = np.sum(np.array(ss) == 4) * np.sum(n_cf.iloc[:, np.array(ss) == 4], axis=1) / np.sum(n_cf.iloc[:, np.array(ss) == 4] * f_cf.iloc[:, np.array(ss) == 4], axis=1)
+    Nc = N_single + N_double + N_triple + N_quad
+    enc = pd.Series(Nc, name='enc', index=codonframe.index)
     return enc
 
 
@@ -269,7 +258,17 @@ if __name__ == "__main__":
         enc = calculate_enc(codonframe)
         print(enc)
 
+    # TAI测试代码
+    if False:
+        # tRNA_GCN = "../test_data/Drosophila_melanogaster_trna_counts.csv"  # 假设文件名为 tRNA_GCN.csv，包含 tRNA 信息
+        codon_pairing_df = calculate_codon_pairing()
+        codon_pairing_df.to_csv("test.csv")
+        # 打印结果
+        print(codon_pairing_df)
 
+
+    
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"执行时间：{execution_time}秒")
+
