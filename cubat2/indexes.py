@@ -4,9 +4,9 @@ import pandas as pd
 from itertools import product
 from collections import defaultdict
 from sequences_loader import sequences_to_codonframe
-from codon_table import get_codon_table_by_index, codon_table_completion, codon_table_subfamily
+from codon_table import get_codon_table_by_index, codon_table_completion, codon_table_subfamily, codon_pair_table
 
-def calculate_rscu(codonframe, codon_table_index=1):
+def calculate_RSCU(codonframe, codon_table_index=1):
     """
     计算序列的相对密码子使用频率 (RSCU)。
 
@@ -87,6 +87,7 @@ def relative_adapt_loader(csv_file, codon_table_index=1):
 
     参数:
     - csv_file (str): 输入的 CSV 文件路径。
+    - codon_table_index (int): 选择的密码子表的序号, 默认为1。
 
     返回:
     - relAdapt (pd.Series): 包含每个密码子的相对适应度的 Series。
@@ -165,7 +166,7 @@ def calculate_CAI(sequences, relAdapt, codon_table_index=1):
     return cai
 
 
-def calculate_enc(codonframe, codon_table_index=1):
+def calculate_ENC(codonframe, codon_table_index=1):
     """
     计算基因的ENC(Effective Number of Codons)值。
 
@@ -174,7 +175,7 @@ def calculate_enc(codonframe, codon_table_index=1):
     - codon_table_index (int): 选择的密码子表的序号, 默认为1。
 
     返回:
-    - enc (pd.Series): 包含每个基因的ENC值的Series。
+    - enc (pd.DataFrame): 包含每个基因的ENC值的DataFrame。
     """
     
     # 获取选择的密码子表
@@ -212,16 +213,87 @@ def calculate_enc(codonframe, codon_table_index=1):
         n_cf[subfamily] = n + len(codons)
 
 
-    ss = [len(codons) for codons in codon_list.values()]
-    N_single = np.sum(np.array(ss) == 1)
-    N_double = np.sum(np.array(ss) == 2) * np.sum(n_cf.iloc[:, np.array(ss) == 2], axis=1) / np.sum(n_cf.iloc[:, np.array(ss) == 2] * f_cf.iloc[:, np.array(ss) == 2], axis=1)
-    N_triple = np.sum(np.array(ss) == 3) * np.sum(n_cf.iloc[:, np.array(ss) == 3], axis=1) / np.sum(n_cf.iloc[:, np.array(ss) == 3] * f_cf.iloc[:, np.array(ss) == 3], axis=1)
-    N_quad = np.sum(np.array(ss) == 4) * np.sum(n_cf.iloc[:, np.array(ss) == 4], axis=1) / np.sum(n_cf.iloc[:, np.array(ss) == 4] * f_cf.iloc[:, np.array(ss) == 4], axis=1)
+    subfamily_group = [len(codons) for codons in codon_list.values()]
+    N_single = np.sum(np.array(subfamily_group) == 1)
+    N_double = np.sum(np.array(subfamily_group) == 2) * np.sum(n_cf.iloc[:, np.array(subfamily_group) == 2], axis=1) / np.sum(n_cf.iloc[:, np.array(subfamily_group) == 2] * f_cf.iloc[:, np.array(subfamily_group) == 2], axis=1)
+    N_triple = np.sum(np.array(subfamily_group) == 3) * np.sum(n_cf.iloc[:, np.array(subfamily_group) == 3], axis=1) / np.sum(n_cf.iloc[:, np.array(subfamily_group) == 3] * f_cf.iloc[:, np.array(subfamily_group) == 3], axis=1)
+    N_quad = np.sum(np.array(subfamily_group) == 4) * np.sum(n_cf.iloc[:, np.array(subfamily_group) == 4], axis=1) / np.sum(n_cf.iloc[:, np.array(subfamily_group) == 4] * f_cf.iloc[:, np.array(subfamily_group) == 4], axis=1)
     Nc = N_single + N_double + N_triple + N_quad
-    enc = pd.Series(Nc, name='enc', index=codonframe.index)
+    enc = pd.DataFrame(Nc, columns=['enc'], index=codonframe.index)
     return enc
 
 
+def calculate_tRNA_relative_adapt(tRNA_GCN, codon_table_index=1,
+                  penalty_coefficient={'WC': 0, 'GU': 0.6295, 'UG': 0.7861, 
+                                       'AI': 0.9075, 'CI': 0.4659, 'UI': 0}):
+    """
+    计算基因的TAI(Effective Number of Codons)值。
+
+    参数:
+    - tRNA_GCN (str): 输入的 CSV 文件路径。
+    - codon_table_index (int): 选择的密码子表的序号, 默认为1。
+    - penalty_coefficient (dic): 各类配对的惩罚系数(原文是selective constraint) TODO 自定义惩罚系数表
+
+    返回:
+    - tRNA_rel_adapt_table (pd.DataFrame): 包含每个codon的tRNA_rel_adapt_norm。
+    """
+    # 从文件中读取 tRNA_GCN 数据
+    tRNA_GCN = pd.read_csv(tRNA_GCN)
+    pair_table = codon_pair_table(codon_table_index)
+    
+    # 初始化 tRNA_GCN、penalty_coefficient 和 tRNA_rel_adapt 列
+    pair_table['tRNA_GCN'] = 0
+    # penalty_coefficient 和 tRNA_rel_adapt 列初始化为浮点型
+    pair_table['penalty_coefficient'] = 0.0
+    pair_table['tRNA_rel_adapt'] = 0.0
+    # 只保留有拷贝数的tRNA
+    # pair_table = pair_table[pair_table['anti_codon'].isin(list(tRNA_GCN['antiCodon']))].reset_index(drop=True)
+
+    for index, row in pair_table.iterrows():
+        anti_codon = row['anti_codon']
+        tRNA_GCN_value = tRNA_GCN[tRNA_GCN['antiCodon'] == anti_codon]['copyCount'].values
+        if len(tRNA_GCN_value) == 1:
+            pair_table.at[index, 'tRNA_GCN'] = int(tRNA_GCN_value[0])
+        elif len(tRNA_GCN_value) > 2:
+            raise ValueError(f"Error in tRNA_GCN data: Expected 1 value for anti-codon {anti_codon}, "
+                            f"but found {len(tRNA_GCN_value)} values.")
+        
+        pair_table.at[index, 'penalty_coefficient'] = penalty_coefficient[row['pair_type']]
+    
+        # 计算 tRNA_rel_adapt 并存储在 tRNA_rel_adapt 列中
+        pair_table.at[index, 'tRNA_rel_adapt'] = (1 - pair_table.at[index, 'penalty_coefficient']) * pair_table.at[index, 'tRNA_GCN']
+    
+    tRNA_rel_adapt_table = pair_table.groupby('codon')['tRNA_rel_adapt'].sum().reset_index()
+    # 按 'codon' 列汇总并重置索引
+    # tRNA_rel_adapt_table = tRNA_rel_adapt_table.groupby('codon')['tRNA_rel_adapt'].sum().reset_index()
+
+    tRNA_rel_adapt = tRNA_rel_adapt_table['tRNA_rel_adapt']
+    tRNA_rel_adapt_table['tRNA_rel_adapt_norm'] = tRNA_rel_adapt / tRNA_rel_adapt.max()
+
+    stop_codons_len = len(get_codon_table_by_index(codon_table_index).stop_codons)
+    number_of_0 = sum(tRNA_rel_adapt==0)# 利用了Ture=1的特性，计算有几个值为0
+    wi_mean = sum(tRNA_rel_adapt_table['tRNA_rel_adapt_norm']) / (64 - stop_codons_len - number_of_0)
+    tRNA_rel_adapt_table['tRNA_rel_adapt_norm'] = tRNA_rel_adapt_table['tRNA_rel_adapt_norm'].apply(lambda x: (wi_mean if x == 0 else x))
+    return tRNA_rel_adapt_table
+
+
+def calculate_TAI(codonframe, tRNA_relative_adapt):
+    """
+    计算基因的TAI(tRNA adaptation index)值。
+
+    参数:
+    - codonframe (pd.DataFrame): 包含每个序列的ID以及每个密码子的数量的DataFrame。
+    - tRNA_relative_adapt (pd.DataFrame): 包含每个codon tRNA_rel_adapt_norm的DataFrame。
+
+    返回:
+    - tai(pd.DataFrame): 包含每个基因的ENC值的DataFrame。
+    """
+    codonframe = codonframe[tRNA_relative_adapt['codon']] # 忽略终止密码子
+    tai_values = np.exp(np.dot(codonframe, np.log(tRNA_relative_adapt['tRNA_rel_adapt_norm'])) / np.sum(codonframe, axis=1))
+    
+    tai = pd.DataFrame(tai_values, columns=['tai'], index=codonframe.index)
+    return tai
+    
 # 示例用法：
 if __name__ == "__main__":
     start_time = time.time()
@@ -229,7 +301,7 @@ if __name__ == "__main__":
     codonframe = sequences_to_codonframe(file_path)
     # RSCU测试代码
     if False:
-        rscuSheet = calculate_rscu(codonframe, codon_table_index=1)
+        rscuSheet = calculate_RSCU(codonframe, codon_table_index=1)
         print(rscuSheet)
         rscuSheet.to_csv("test.csv")
 
@@ -253,9 +325,21 @@ if __name__ == "__main__":
     
     # ENC测试代码
     if False:
-        enc = calculate_enc(codonframe)
+        enc = calculate_ENC(codonframe)
         print(enc)
 
+    # calculate_tRNA_relative_adapt测试代码
+    if False:
+        tRNA_relative_adapt = calculate_tRNA_relative_adapt(tRNA_GCN='../test_data/Drosophila_melanogaster_trna_counts.csv')
+        print(tRNA_relative_adapt)
+    
+    # calculate_tRNA_relative_adap测试代码
+    if False:
+        tRNA_relative_adapt = calculate_tRNA_relative_adapt(tRNA_GCN='../test_data/Drosophila_melanogaster_trna_counts.csv')
+        # print(tRNA_relative_adapt)
+        # tRNA_relative_adapt.to_csv("test.csv")
+        tai = calculate_TAI(codonframe, tRNA_relative_adapt)
+        print(tai)
 
     
     end_time = time.time()
