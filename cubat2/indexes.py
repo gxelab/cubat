@@ -1,6 +1,7 @@
 import time
 import numpy as np
 import pandas as pd
+from itertools import product
 from collections import defaultdict
 from sequences_loader import sequences_to_codonframe
 from codon_table import get_codon_table_by_index, codon_table_completion, codon_table_subfamily
@@ -184,13 +185,11 @@ def calculate_enc(codonframe, codon_table_index=1):
     stop_codons = codon_table.stop_codons
     codonframe = codonframe.drop(columns=stop_codons, errors='ignore')
 
-    # 计算同义密码子的亚家族（subfam）
+    # 计算同义密码子的亚家族（subfamily）
     subfamily_dict = {}
     for codon, subfamily in zip(subfamily_table['codon'], subfamily_table['subfamily']):
         subfamily_dict[codon] = subfamily
     
-    # 初始化 enc 值的字典
-    enc_values = {}
 
    # 根据亚家族分组密码子
     codon_list = {}
@@ -200,7 +199,6 @@ def calculate_enc(codonframe, codon_table_index=1):
         if subfamily not in codon_list:
             codon_list[subfamily] = []
         codon_list[subfamily].append(codon)
-
 
     # 计算 ENC
     f_cf = pd.DataFrame(index=codonframe.index)
@@ -254,17 +252,9 @@ if __name__ == "__main__":
         print(cai)
     
     # ENC测试代码
-    if True:
+    if False:
         enc = calculate_enc(codonframe)
         print(enc)
-
-    # TAI测试代码
-    if False:
-        # tRNA_GCN = "../test_data/Drosophila_melanogaster_trna_counts.csv"  # 假设文件名为 tRNA_GCN.csv，包含 tRNA 信息
-        codon_pairing_df = calculate_codon_pairing()
-        codon_pairing_df.to_csv("test.csv")
-        # 打印结果
-        print(codon_pairing_df)
 
 
     

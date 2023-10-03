@@ -1,4 +1,5 @@
 import pandas as pd
+from Bio.Seq import Seq
 from Bio.Data import CodonTable
 
 
@@ -7,7 +8,7 @@ def get_codon_table_by_index(index=1):
     根据密码子表的序号获取密码子表以及每个密码子表的起始密码子和终止密码子。
 
     参数:
-    index (int): 密码子表的序号。
+    index (str): 密码子表的序号。
 
     返回:
     codon_table (Bio.Data.CodonTable): 密码子表对象。
@@ -22,7 +23,7 @@ def get_codon_table_by_index(index=1):
         raise ValueError("Invalid codon table index")
 
     # 获取指定序号的密码子表
-    codon_table = all_codon_tables[index]
+    codon_table = all_codon_tables[int(index)]
 
     # # 获取起始密码子和终止密码子
     # start_codon = codon_table.start_codons
@@ -32,7 +33,16 @@ def get_codon_table_by_index(index=1):
 
 
 def codon_table_completion(index=1):
-    codon_table = CodonTable.unambiguous_dna_by_id[index].forward_table
+    """
+    由于biopyhton的密码子表不包含终止密码子, 所以需要一个函数来返回完整密码子表。
+
+    参数:
+    - index (str): 密码子表的编号，默认为 '1'。
+
+    返回:
+    - complete_codon_table (pd.DataFrame): 完整的密码子表。
+    """
+    codon_table = CodonTable.unambiguous_dna_by_id[int(index)].forward_table
     codons = ["TTT", "TTC", "TTA", "TTG",
               "TCT", "TCC", "TCA", "TCG",
               "TAT", "TAC", "TAA", "TAG",
@@ -76,7 +86,6 @@ def codon_table_subfamily(index= 1):
     }
 
     for codon, amino_acid in codon_table.forward_table.items():
-        aa_code = CodonTable.ambiguous_dna_by_id[int(index)].forward_table[codon]
         subfamily = f"{amino_acid}_{codon[:2]}"
         codon_table_dict['codon'].append(codon)
         codon_table_dict['amino_acid'].append(amino_acid)
@@ -86,9 +95,84 @@ def codon_table_subfamily(index= 1):
     return codon_table_subfamily
 
 
+def codon_pair_table(index= 1):
+    """
+    根据密码子表编号获取密码子表的配对信息。
+
+    参数:
+    - index (str): 密码子表的编号，默认为 '1'。
+
+    返回:
+    - codon_pair_table (pd.DataFrame): 包含密码子配对信息的DataFrame, 包含codon, anti_codon, type(配对类型)。
+    """
+    codon_table = CodonTable.unambiguous_rna_by_id[int(index)] # 这里使用的是RNA的密码子表
+    codon_table_dict = {
+        'strict_base': [], # 前两位碱基严格配对
+        'wobble_base': [], # 摆动配对的碱基
+        'codon': [],
+        'anti_codon': [],
+        'pair_type': [],
+        'codon_amino_acid': [],
+        'anti_amino_acid': []
+    }
+
+    for codon, amino_acid in codon_table.forward_table.items():
+        # 前两位碱基严格配对，后一位碱基为摆动配对
+        strict_base, wobble_base = codon[0:2], codon[2]
+        codon_table_dict['strict_base'].append(strict_base)
+        codon_table_dict['wobble_base'].append(wobble_base)
+
+        codon_table_dict['codon'].append(codon)
+        anti_codon = str(Seq(codon).reverse_complement_rna()) # 反向互补序列
+        codon_table_dict['anti_codon'].append(anti_codon)
+        
+        codon_table_dict['pair_type'].append('WC(standard)')
+        codon_table_dict['codon_amino_acid'].append(amino_acid)
+        codon_table_dict['anti_amino_acid'].append(amino_acid)
+
+    standard_table = pd.DataFrame(codon_table_dict)
+
+    wobble_table = pd.DataFrame(columns=standard_table.columns.tolist())
+
+    for index, row in standard_table.iterrows():
+        if row['wobble_base'] in ['U', 'G']:
+            # 这里是GU或者UG配对的anti codon
+            anti_codon = ('G' if row['wobble_base'] == 'U' else 'U') + row['anti_codon'][1:3]
+            wobble_name = 'UG(wobble)' if row['wobble_base'] == 'U' else 'GU(wobble)'
+        elif row['wobble_base'] in ['A', 'C', 'U']:
+            # 这里是AI, CI, 或者UI配对的anti codon
+            anti_codon = 'A' + row['anti_codon'][1:3]
+            wobble_name = row['wobble_base'] + 'I(wobble)'
+
+        # 如果是终止密码子那么就跳过     
+        if str(Seq(anti_codon).reverse_complement_rna()) in codon_table.stop_codons:
+            continue
+
+        # 相关信息按行添加进wobble_table
+        wobble_table.loc[index] = [row['strict_base'], 
+                                row['wobble_base'],
+                                row['codon'],
+                                anti_codon,
+                                wobble_name,
+                                row['codon_amino_acid'],
+                                codon_table.forward_table[str(Seq(anti_codon).reverse_complement_rna())]
+                                ]
+
+    # 删除codon和anti codon氨基酸不一样的情况
+    wobble_table = wobble_table[wobble_table['codon_amino_acid'] == wobble_table['anti_amino_acid']]
+
+    # 合并dataframe并且进行整理
+    codon_pair_table = pd.concat([standard_table, wobble_table], axis=0)
+    codon_pair_table = codon_pair_table.drop(columns=['strict_base', 'wobble_base', 'anti_amino_acid'])
+    codon_pair_table.rename(columns={'codon_amino_acid': 'amino_acid'}, inplace=True)
+    codon_pair_table = codon_pair_table.reset_index(drop=True)
+
+    return codon_pair_table
+
+
 # 测试代码：
 if __name__ == "__main__":
     index = 1  # 例如，选择标准密码子表
-    codon_table = codon_table_subfamily(index)
+    codon_table = codon_pair_table(index)
     print(codon_table)
     
